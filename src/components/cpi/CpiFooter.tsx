@@ -44,6 +44,8 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
             
               href="https://tablebuilder.singstat.gov.sg"
+            ...
+            </a>
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-neutral-900 dark:hover:text-white transition-colors"
