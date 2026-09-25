@@ -1,16 +1,52 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --color-up: #089981;
+    --color-down: #f23645;
+    --color-pro-blue: #2962ff;
+  }
+
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: #faf8ff;
-    color: #191b24;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f6f7fb;
+    color: #131722;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Monospace figures for financial alignment */
+  .font-mono, [class*="font-mono"], .font-jetbrains {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
   }
 }
 
 .dark body {
-  background-color: #13151c;
-  color: #ededfa;
+  background-color: #0c0e14;
+  color: #d1d4dc;
+}
+
+/* Custom Financial Terminal Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3c6d5;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2a2e39;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a5b8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3e4454;
 }
 
 /* Hide scrollbar for category pills / horizontal scroll */
@@ -20,4 +56,51 @@
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Smooth ticker tape animation */
+@keyframes ticker {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 38s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Flash pulse for live ticks */
+@keyframes tick-flash-green {
+  0% {
+    background-color: rgba(8, 153, 129, 0.25);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes tick-flash-red {
+  0% {
+    background-color: rgba(242, 54, 69, 0.25);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.tick-up-flash {
+  animation: tick-flash-green 0.7s ease-out;
+}
+
+.tick-down-flash {
+  animation: tick-flash-red 0.7s ease-out;
 }

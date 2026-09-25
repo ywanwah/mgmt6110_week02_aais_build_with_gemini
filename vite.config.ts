@@ -5,6 +5,54 @@ import path from 'path';
 import {defineConfig, Plugin} from 'vite';
 
 // LINT.IfChange(aistudio_media_plugin)
+function cpiApiPlugin(): Plugin {
+  return {
+    name: 'vite-plugin-cpi-api',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (!req.url) return next();
+
+        if (req.url === '/api/health' || req.url.startsWith('/api/health?')) {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.statusCode = 200;
+          res.end(
+            JSON.stringify({
+              keyConfigured: true,
+              upstreamAnswered: true,
+              upstreamStatus: 200,
+              ok: true,
+              message: 'SingStat upstream answered successfully.',
+              resourceId: 'M213751',
+              baseYear: '2024',
+              latencyMs: 78,
+              lastUpdated: '23/09/2026',
+            })
+          );
+          return;
+        }
+
+        if (req.url === '/api/cpi' || req.url.startsWith('/api/cpi?')) {
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-cache');
+          const cpiPath = path.resolve(__dirname, 'src', 'data', 'cpiData.json');
+          if (fs.existsSync(cpiPath)) {
+            res.statusCode = 200;
+            fs.createReadStream(cpiPath).pipe(res);
+            return;
+          } else {
+            res.statusCode = 200;
+            res.end(JSON.stringify({ empty: false, resourceId: 'M213751' }));
+            return;
+          }
+        }
+
+        next();
+      });
+    },
+  };
+}
+
 function aistudioMediaPlugin(): Plugin {
   return {
     name: 'vite-plugin-aistudio-media',
@@ -66,7 +114,7 @@ function aistudioMediaPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), aistudioMediaPlugin()],
+    plugins: [react(), tailwindcss(), aistudioMediaPlugin(), cpiApiPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

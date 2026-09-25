@@ -1,60 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { IndicesBar } from './components/IndicesBar';
-import { MarketGrid } from './components/MarketGrid';
-import { EconomySection } from './components/EconomySection';
-import { MarketHeatmap } from './components/MarketHeatmap';
-import { MarketDetailModal } from './components/MarketDetailModal';
-import { CommandPalette } from './components/CommandPalette';
-import { WatchlistDrawer } from './components/WatchlistDrawer';
-import { GetStartedModal } from './components/GetStartedModal';
-import { InfoModal } from './components/InfoModal';
-import { Footer } from './components/Footer';
-import { MarketCategory, MarketItem } from './types';
-import { initialMarketItems, mockEconomicIndicators } from './data/mockMarketData';
+import { CpiHeader } from './components/cpi/CpiHeader';
+import { CpiHeroStats } from './components/cpi/CpiHeroStats';
+import { CpiTrendChart } from './components/cpi/CpiTrendChart';
+import { CpiCategoriesTable } from './components/cpi/CpiCategoriesTable';
+import { CpiPersonalCalculator } from './components/cpi/CpiPersonalCalculator';
+import { CpiHistoricalLedger } from './components/cpi/CpiHistoricalLedger';
+import { CpiHealthModal } from './components/cpi/CpiHealthModal';
+import { CpiFooter } from './components/cpi/CpiFooter';
+import { initialCpiData } from './data/singstatData';
+import { CpiApiResponse, CpiViewTab } from './types/cpi';
+import { exportCpiToCsv, downloadJson } from './utils/cpiUtils';
+import { AlertCircle, Check, ArrowRight, TrendingUp, TrendingDown, Layers, ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  const [selectedCategory, setSelectedCategory] = useState<MarketCategory>('US stocks');
-  const [activeNav, setActiveNav] = useState<string>('Markets');
-  const [activeViewMode, setActiveViewMode] = useState<'dashboard' | 'heatmap' | 'watchlist'>('dashboard');
-  const [items, setItems] = useState<MarketItem[]>(initialMarketItems);
-  const [isLiveUpdating, setIsLiveUpdating] = useState<boolean>(true);
-  const [recentTickMap, setRecentTickMap] = useState<Record<string, 'up' | 'down'>>({});
-  
-  // Modals & Panels
-  const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
-  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
-  const [isWatchlistOpen, setIsWatchlistOpen] = useState<boolean>(false);
-  const [isGetStartedOpen, setIsGetStartedOpen] = useState<boolean>(false);
-  const [legalTopic, setLegalTopic] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [cpiData, setCpiData] = useState<CpiApiResponse>(initialCpiData);
+  const [activeTab, setActiveTab] = useState<CpiViewTab>('overview');
+  const [isHealthModalOpen, setIsHealthModalOpen] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>('Just now');
+  const [darkMode, setDarkMode] = useState<boolean>(true);
 
-  // Watchlist persisted state
-  const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('fh_watchlist');
-      return saved ? JSON.parse(saved) : ['SPX', 'NDX', 'NVDA', 'BTC/USD'];
-    } catch {
-      return ['SPX', 'NDX', 'NVDA', 'BTC/USD'];
-    }
-  });
+  // Set default dark mode for institutional look
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
-  const toggleWatchlist = (symbol: string) => {
-    setWatchlistSymbols((prev) => {
-      const next = prev.includes(symbol)
-        ? prev.filter((s) => s !== symbol)
-        : [...prev, symbol];
-      try {
-        localStorage.setItem('fh_watchlist', JSON.stringify(next));
-      } catch (err) {
-        console.error(err);
-      }
-      return next;
-    });
-  };
-
-  // Dark Mode Sync
   const toggleDarkMode = () => {
     setDarkMode((prev) => {
       const next = !prev;
@@ -67,221 +38,228 @@ export default function App() {
     });
   };
 
-  // Live price tick simulation loop
-  useEffect(() => {
-    if (!isLiveUpdating) return;
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((curr) => (curr === msg ? null : curr));
+    }, 3000);
+  };
 
-    const interval = setInterval(() => {
-      // Pick 1 to 3 random items to tick
-      const count = Math.floor(Math.random() * 2) + 1;
-      const targetIndices: number[] = [];
-      while (targetIndices.length < count) {
-        const r = Math.floor(Math.random() * items.length);
-        if (!targetIndices.includes(r)) targetIndices.push(r);
+  // Fetch CPI data from /api/cpi
+  const loadCpiData = useCallback(async (isManualRefresh = false) => {
+    if (isManualRefresh) setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/cpi');
+      if (res.ok) {
+        const json = await res.json();
+        if (json && !json.empty && json.latest) {
+          // Merge with initial rich categories if backend only returns basic subset
+          setCpiData({
+            ...initialCpiData,
+            ...json,
+            categories: json.categories && json.categories.length >= 8 ? json.categories : initialCpiData.categories,
+            recentMonthly: json.recentMonthly && json.recentMonthly.length > 0 ? json.recentMonthly : initialCpiData.recentMonthly,
+          });
+          setLastUpdatedTime(new Date().toLocaleTimeString());
+          if (isManualRefresh) showToast('SingStat data refreshed successfully');
+        }
       }
-
-      const updatedTicks: Record<string, 'up' | 'down'> = {};
-
-      setItems((prevItems) =>
-        prevItems.map((item, idx) => {
-          if (!targetIndices.includes(idx)) return item;
-
-          const deltaPercent = (Math.random() - 0.48) * 0.003;
-          const priceChange = item.price * deltaPercent;
-          const newPrice = Math.max(0.01, item.price + priceChange);
-          const newChange = item.change + priceChange;
-          const newChangePercent = (newChange / (newPrice - newChange)) * 100;
-          const direction: 'up' | 'down' = priceChange >= 0 ? 'up' : 'down';
-          updatedTicks[item.id] = direction;
-
-          // Update sparkline
-          const newSparkline = [...item.sparkline.slice(1), newPrice];
-
-          // Update 1D history last point
-          const hist1D = [...(item.history['1D'] || [])];
-          if (hist1D.length > 0) {
-            const lastPoint = hist1D[hist1D.length - 1];
-            hist1D[hist1D.length - 1] = {
-              ...lastPoint,
-              price: parseFloat(newPrice.toFixed(2)),
-              high: Math.max(lastPoint.high || newPrice, newPrice),
-              low: Math.min(lastPoint.low || newPrice, newPrice),
-            };
-          }
-
-          return {
-            ...item,
-            price: newPrice,
-            change: newChange,
-            changePercent: newChangePercent,
-            high24h: Math.max(item.high24h, newPrice),
-            low24h: Math.min(item.low24h, newPrice),
-            sparkline: newSparkline,
-            history: {
-              ...item.history,
-              '1D': hist1D,
-            },
-          };
-        })
-      );
-
-      setRecentTickMap(updatedTicks);
-      setTimeout(() => {
-        setRecentTickMap({});
-      }, 700);
-    }, 2400);
-
-    return () => clearInterval(interval);
-  }, [isLiveUpdating, items.length]);
-
-  // Keyboard shortcut for Command Palette
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsSearchOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    } catch (err) {
+      console.warn('Could not fetch from /api/cpi, using local SingStat dataset:', err);
+    } finally {
+      if (isManualRefresh) setIsRefreshing(false);
+    }
   }, []);
 
+  useEffect(() => {
+    loadCpiData();
+  }, [loadCpiData]);
+
+  // Quick movers for overview preview
+  const topMovers = [...cpiData.categories]
+    .filter((c) => c.seriesNo !== 'MAS.CORE')
+    .sort((a, b) => Math.abs(b.yoyPercent) - Math.abs(a.yoyPercent))
+    .slice(0, 4);
+
   return (
-    <div className="min-h-screen bg-[#faf8ff] dark:bg-[#13151c] text-[#191b24] dark:text-[#ededfa] font-['Inter'] flex flex-col transition-colors duration-200">
-      {/* Top Header */}
-      <Header
-        onOpenSearch={() => setIsSearchOpen(true)}
-        activeNav={activeNav}
-        onSelectNav={(nav) => {
-          setActiveNav(nav);
-          if (nav !== 'Markets') {
-            setLegalTopic(nav.toLowerCase());
-          }
+    <div className="min-h-screen bg-neutral-50 dark:bg-[#080c14] text-neutral-900 dark:text-neutral-100 flex flex-col font-sans transition-colors selection:bg-red-600 selection:text-white">
+      
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-semibold shadow-lg animate-in slide-in-from-bottom-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Institutional Top Bar */}
+      <CpiHeader
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenHealthModal={() => setIsHealthModalOpen(true)}
+        onExportCsv={() => {
+          exportCpiToCsv(cpiData);
+          showToast('Downloaded CPI Historical CSV');
         }}
+        onExportJson={() => {
+          downloadJson(cpiData, 'singstat_cpi_data.json');
+          showToast('Exported SingStat JSON');
+        }}
+        onRefresh={() => loadCpiData(true)}
+        isRefreshing={isRefreshing}
         darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
-        onOpenGetStarted={() => setIsGetStartedOpen(true)}
-        watchlistCount={watchlistSymbols.length}
-        onOpenWatchlist={() => setIsWatchlistOpen(true)}
+        toggleDarkMode={toggleDarkMode}
+        lastUpdatedTime={lastUpdatedTime}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[1280px] mx-auto px-4 md:px-6 pb-16">
-        {/* Hero Headline */}
-        <Hero
-          selectedCategory={selectedCategory}
-          onSelectCategory={(cat) => {
-            setSelectedCategory(cat);
-            setActiveViewMode('dashboard');
-          }}
-          isLiveUpdating={isLiveUpdating}
-          onToggleLive={() => setIsLiveUpdating(!isLiveUpdating)}
-          activeViewMode={activeViewMode}
-          onSelectViewMode={setActiveViewMode}
-        />
-
-        {/* Indices Highlight Bar with the 3 exact cards */}
-        <IndicesBar
-          selectedCategory={selectedCategory}
-          onSelectCategory={(cat) => {
-            setSelectedCategory(cat);
-            setActiveViewMode('dashboard');
-          }}
-          items={items}
-          onSelectItem={setSelectedItem}
-          recentTickMap={recentTickMap}
-        />
-
-        {/* View Mode Switching */}
-        {activeViewMode === 'dashboard' && (
-          selectedCategory === 'Economy' ? (
-            <EconomySection indicators={mockEconomicIndicators} />
-          ) : (
-            <MarketGrid
-              category={selectedCategory}
-              items={items}
-              onSelectItem={setSelectedItem}
-              watchlistSymbols={watchlistSymbols}
-              onToggleWatchlist={toggleWatchlist}
-              recentTickMap={recentTickMap}
+      {/* Main Content Viewport */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        {/* Tab 1: Overview & Macro Trends */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Primary KPI Ribbon */}
+            <CpiHeroStats
+              latest={cpiData.latest}
+              dataLastUpdated={cpiData.dataLastUpdated}
+              onOpenBreakdown={() => setActiveTab('breakdown')}
             />
-          )
-        )}
 
-        {activeViewMode === 'heatmap' && (
-          <MarketHeatmap
-            items={items}
-            onSelectItem={setSelectedItem}
-          />
-        )}
+            {/* Interactive Trend Chart */}
+            <CpiTrendChart data={cpiData.recentMonthly} />
 
-        {activeViewMode === 'watchlist' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-['Hanken_Grotesk'] text-xl font-bold text-[#191b24] dark:text-white">
-                My Personalized Watchlist ({watchlistSymbols.length})
-              </h3>
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="text-xs bg-[#2962ff] text-white px-3.5 py-1.5 rounded-full font-semibold hover:bg-[#0049db] transition-colors"
-              >
-                + Add Symbol
-              </button>
+            {/* Overview Quick Drill-down Bento Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Card 1: Top Inflation Drivers */}
+              <div className="p-6 rounded-2xl bg-white dark:bg-[#0f141f] border border-neutral-200 dark:border-neutral-800 shadow-xs">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100 dark:border-neutral-800">
+                  <div>
+                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
+                      Top Price Volatility Drivers
+                    </h3>
+                    <p className="text-xs text-neutral-500">
+                      Largest annual price swings across major consumption groups
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('breakdown')}
+                    className="flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    <span>View All</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="divide-y divide-neutral-100 dark:divide-neutral-800/80">
+                  {topMovers.map((m) => {
+                    const isUp = m.yoyPercent >= 0;
+                    return (
+                      <div key={m.seriesNo} className="py-2.5 flex items-center justify-between text-xs">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-neutral-900 dark:text-white">
+                            {m.name}
+                          </span>
+                          <span className="text-[11px] text-neutral-400 font-mono">
+                            Index: {m.value.toFixed(3)} · Weight: {m.weight ? `${m.weight}%` : '—'}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className={`font-mono font-bold ${isUp ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                            {isUp ? `+${m.yoyPercent.toFixed(2)}%` : `${m.yoyPercent.toFixed(2)}%`} YoY
+                          </span>
+                          <span className="text-[11px] font-mono text-neutral-400">
+                            {m.momPercent >= 0 ? `+${m.momPercent.toFixed(2)}%` : `${m.momPercent.toFixed(2)}%`} MoM
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Card 2: MAS Policy & Living Standard Gauge */}
+              <div className="p-6 rounded-2xl bg-white dark:bg-[#0f141f] border border-neutral-200 dark:border-neutral-800 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100 dark:border-neutral-800">
+                    <div>
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
+                        Monetary Policy &amp; Living Costs
+                      </h3>
+                      <p className="text-xs text-neutral-500">
+                        MAS S$NEER Policy Framework alignment &amp; household simulation
+                      </p>
+                    </div>
+                    <ShieldCheck className="w-5 h-5 text-blue-500" />
+                  </div>
+
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+                    The Monetary Authority of Singapore (MAS) manages the exchange rate (S$NEER) rather than interest rates to stabilize domestic prices. Current MAS Core Inflation stands at <strong className="text-neutral-900 dark:text-white font-mono">+2.10% YoY</strong>, within the central bank's medium-term price stability target band of 1.5% to 2.5%.
+                  </p>
+
+                  <div className="p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 text-xs space-y-1.5">
+                    <div className="flex justify-between items-center text-neutral-500">
+                      <span>MAS Medium-Term Target:</span>
+                      <span className="font-mono text-neutral-900 dark:text-white font-medium">1.5% – 2.5%</span>
+                    </div>
+                    <div className="flex justify-between items-center text-neutral-500">
+                      <span>Current Core Position:</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">Within Target Range</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('calculator')}
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs"
+                >
+                  <span>Simulate Your Household's Personal Inflation</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
             </div>
-            <MarketGrid
-              category={selectedCategory}
-              items={items.filter((i) => watchlistSymbols.includes(i.symbol))}
-              onSelectItem={setSelectedItem}
-              watchlistSymbols={watchlistSymbols}
-              onToggleWatchlist={toggleWatchlist}
-              recentTickMap={recentTickMap}
+          </div>
+        )}
+
+        {/* Tab 2: Detailed Expenditure Categories */}
+        {activeTab === 'breakdown' && (
+          <div className="animate-in fade-in duration-200">
+            <CpiCategoriesTable
+              categories={cpiData.categories}
+              latestPeriod={cpiData.latest.period}
             />
           </div>
         )}
+
+        {/* Tab 3: Personal Inflation Simulator */}
+        {activeTab === 'calculator' && (
+          <div className="animate-in fade-in duration-200">
+            <CpiPersonalCalculator headlineYoY={cpiData.latest.yoyPercent} />
+          </div>
+        )}
+
+        {/* Tab 4: Historical Monthly Ledger */}
+        {activeTab === 'ledger' && (
+          <div className="animate-in fade-in duration-200">
+            <CpiHistoricalLedger data={cpiData} />
+          </div>
+        )}
+
       </main>
 
-      {/* Footer */}
-      <Footer onOpenLegal={(topic) => setLegalTopic(topic)} />
-
-      {/* Modals & Slide-over Drawers */}
-      <MarketDetailModal
-        item={selectedItem}
-        onClose={() => setSelectedItem(null)}
-        isStarred={selectedItem ? watchlistSymbols.includes(selectedItem.symbol) : false}
-        onToggleWatchlist={toggleWatchlist}
+      {/* Official Footnote & Attribution Footer */}
+      <CpiFooter
+        footnote={cpiData.footnote}
+        dataLastUpdated={cpiData.dataLastUpdated}
       />
 
-      <CommandPalette
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        items={items}
-        onSelectItem={(item) => {
-          setSelectedItem(item);
-          setIsSearchOpen(false);
-        }}
-        watchlistSymbols={watchlistSymbols}
-        onToggleWatchlist={toggleWatchlist}
+      {/* SingStat API Health Diagnostics Modal */}
+      <CpiHealthModal
+        isOpen={isHealthModalOpen}
+        onClose={() => setIsHealthModalOpen(false)}
       />
 
-      <WatchlistDrawer
-        isOpen={isWatchlistOpen}
-        onClose={() => setIsWatchlistOpen(false)}
-        watchlistSymbols={watchlistSymbols}
-        items={items}
-        onSelectItem={setSelectedItem}
-        onRemoveFromWatchlist={toggleWatchlist}
-        onOpenSearch={() => setIsSearchOpen(true)}
-      />
-
-      <GetStartedModal
-        isOpen={isGetStartedOpen}
-        onClose={() => setIsGetStartedOpen(false)}
-      />
-
-      <InfoModal
-        topic={legalTopic}
-        onClose={() => setLegalTopic(null)}
-      />
     </div>
   );
 }
