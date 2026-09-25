@@ -42,10 +42,7 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            
-              href="https://tablebuilder.singstat.gov.sg"
-            ...
-            </a>
+            <a href="https://tablebuilder.singstat.gov.sg"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-neutral-900 dark:hover:text-white transition-colors"
@@ -53,8 +50,7 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
               <span>TableBuilder Portal</span>
               <ExternalLink className="w-3 h-3" />
             </a>
-            
-              href="https://data.gov.sg/open-data-licence"
+            <a href="https://data.gov.sg/open-data-licence"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-neutral-900 dark:hover:text-white transition-colors"
