@@ -42,7 +42,7 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            <a
+            
               href="https://tablebuilder.singstat.gov.sg"
               target="_blank"
               rel="noopener noreferrer"
@@ -51,7 +51,7 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
               <span>TableBuilder Portal</span>
               <ExternalLink className="w-3 h-3" />
             </a>
-            <a
+            
               href="https://data.gov.sg/open-data-licence"
               target="_blank"
               rel="noopener noreferrer"
@@ -63,6 +63,25 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
             <span>All rights reserved © 2026</span>
           </div>
         </div>
+
+        {/* Privacy Notice: Microsoft Clarity & Disqus */}
+        <p className="pt-4 border-t border-neutral-200/60 dark:border-neutral-800/60 text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+          This page uses Microsoft Clarity and Disqus, which use cookies to record how visitors
+          use the site and to host comments. By using this page you agree that we and Microsoft
+          may collect and use this data. See the{' '}
+          <a href="https://www.microsoft.com/privacy/privacystatement" target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-900 dark:hover:text-white">
+            Microsoft Privacy Statement
+          </a>
+          , the{' '}
+          <a href="https://disqus.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-900 dark:hover:text-white">
+            Disqus privacy policy
+          </a>{' '}
+          and the{' '}
+          <a href="https://disqus.com/data-sharing-settings/" target="_blank" rel="noopener noreferrer" className="underline hover:text-neutral-900 dark:hover:text-white">
+            Disqus data sharing settings
+          </a>
+          .
+        </p>
 
       </div>
     </footer>
