@@ -7,6 +7,7 @@ import { CpiPersonalCalculator } from './components/cpi/CpiPersonalCalculator';
 import { CpiHistoricalLedger } from './components/cpi/CpiHistoricalLedger';
 import { CpiHealthModal } from './components/cpi/CpiHealthModal';
 import { CpiFooter } from './components/cpi/CpiFooter';
+import { DisqusComments } from './components/DisqusComments';
 import { initialCpiData } from './data/singstatData';
 import { CpiApiResponse, CpiViewTab } from './types/cpi';
 import { exportCpiToCsv, downloadJson } from './utils/cpiUtils';
@@ -247,7 +248,8 @@ export default function App() {
         )}
 
       </main>
-
+          <DisqusComments />
+      
       {/* Official Footnote & Attribution Footer */}
       <CpiFooter
         footnote={cpiData.footnote}
