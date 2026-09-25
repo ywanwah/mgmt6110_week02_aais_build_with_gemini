@@ -247,8 +247,8 @@ export default function App() {
           </div>
         )}
 
+        <DisqusComments />
       </main>
-          <DisqusComments />
       
       {/* Official Footnote & Attribution Footer */}
       <CpiFooter
