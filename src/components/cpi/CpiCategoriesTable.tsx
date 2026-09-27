@@ -1,23 +1,37 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, Download, Filter, Info, TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
-import { CpiCategoryItem } from '../../types/cpi';
+import { CpiCategoryItem, CategorySortField, CategorySortOrder } from '../../types/cpi';
 import { exportCategoriesToCsv } from '../../utils/cpiUtils';
 import { Tooltip } from '../help/Tooltip';
+
+export type SortField = CategorySortField;
+export type SortOrder = CategorySortOrder;
 
 interface CpiCategoriesTableProps {
   categories: CpiCategoryItem[];
   latestPeriod: string;
+  sortField?: CategorySortField;
+  sortOrder?: CategorySortOrder;
+  onSort?: (field: CategorySortField) => void;
 }
 
 type FilterMode = 'all' | 'high' | 'moderate' | 'deflation' | 'weight';
-type SortField = 'name' | 'weight' | 'value' | 'momPercent' | 'yoyPercent';
-type SortOrder = 'asc' | 'desc';
 
-export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categories, latestPeriod }) => {
+export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({
+  categories,
+  latestPeriod,
+  sortField: controlledSortField,
+  sortOrder: controlledSortOrder,
+  onSort,
+}) => {
+  const [internalSortField, setInternalSortField] = useState<SortField>('weight');
+  const [internalSortOrder, setInternalSortOrder] = useState<SortOrder>('desc');
+
+  const sortField = controlledSortField !== undefined ? controlledSortField : internalSortField;
+  const sortOrder = controlledSortOrder !== undefined ? controlledSortOrder : internalSortOrder;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
-  const [sortField, setSortField] = useState<SortField>('weight');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [expandedSeries, setExpandedSeries] = useState<string | null>(null);
 
   const toggleExpand = (seriesNo: string) => {
@@ -25,11 +39,15 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
   };
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    if (onSort) {
+      onSort(field);
     } else {
-      setSortField(field);
-      setSortOrder(field === 'name' ? 'asc' : 'desc');
+      if (sortField === field) {
+        setInternalSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setInternalSortField(field);
+        setInternalSortOrder(field === 'name' ? 'asc' : 'desc');
+      }
     }
   };
 

@@ -56,3 +56,6 @@ export interface ApiHealthStatus {
 
 export type CpiViewTab = 'overview' | 'breakdown' | 'calculator' | 'ledger';
 export type ChartMetricMode = 'index' | 'yoy' | 'mom';
+
+export type CategorySortField = 'name' | 'weight' | 'value' | 'momPercent' | 'yoyPercent';
+export type CategorySortOrder = 'asc' | 'desc';

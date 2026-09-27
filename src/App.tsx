@@ -11,7 +11,7 @@ import { DisqusComments } from './components/DisqusComments';
 import { HelpModal, HelpTabId } from './components/help/HelpModal';
 import { Tooltip } from './components/help/Tooltip';
 import { initialCpiData } from './data/singstatData';
-import { CpiApiResponse, CpiCategoryItem, CpiViewTab } from './types/cpi';
+import { CpiApiResponse, CpiCategoryItem, CpiViewTab, CategorySortField, CategorySortOrder } from './types/cpi';
 import { exportCpiToCsv, downloadJson } from './utils/cpiUtils';
 import { AlertCircle, Check, ArrowRight, TrendingUp, TrendingDown, Layers, ShieldCheck, HelpCircle } from 'lucide-react';
 
@@ -25,6 +25,19 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>('Just now');
   const [darkMode, setDarkMode] = useState<boolean>(true);
+
+  // Preserve table sort state across in-app tab changes (in-memory only)
+  const [categorySortField, setCategorySortField] = useState<CategorySortField>('weight');
+  const [categorySortOrder, setCategorySortOrder] = useState<CategorySortOrder>('desc');
+
+  const handleCategorySort = useCallback((field: CategorySortField) => {
+    if (categorySortField === field) {
+      setCategorySortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setCategorySortField(field);
+      setCategorySortOrder(field === 'name' ? 'asc' : 'desc');
+    }
+  }, [categorySortField]);
 
   // Set default dark mode for institutional look
   useEffect(() => {
@@ -269,6 +282,9 @@ export default function App() {
             <CpiCategoriesTable
               categories={cpiData.categories}
               latestPeriod={cpiData.latest.period}
+              sortField={categorySortField}
+              sortOrder={categorySortOrder}
+              onSort={handleCategorySort}
             />
           </div>
         )}
