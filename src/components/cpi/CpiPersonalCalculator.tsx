@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, ArrowRight, RotateCcw, AlertCircle, DollarSign, PieChart, Sparkles } from 'lucide-react';
+import { Calculator, ArrowRight, RotateCcw, AlertCircle, DollarSign, PieChart, Sparkles, HelpCircle, Info } from 'lucide-react';
+import { Tooltip } from '../help/Tooltip';
 
 interface CpiPersonalCalculatorProps {
   headlineYoY: number; // e.g. 2.35
@@ -102,6 +103,11 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             <h2 className="text-base font-bold text-neutral-900 dark:text-white tracking-tight">
               Personal Inflation Rate Simulator
             </h2>
+            <Tooltip
+              title="Personal Inflation Rate Simulator"
+              content="Simulates your specific household inflation based on your custom spending proportions. While Headline CPI uses national average weights, your true living cost inflation reflects your own family budget mix."
+              iconSize={15}
+            />
             <span className="text-xs text-neutral-400">·</span>
             <span className="text-xs font-mono text-neutral-500">Custom Household Modeling</span>
           </div>
@@ -121,7 +127,13 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
 
       {/* Preset Selector */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-        <span className="text-xs text-neutral-500 font-medium shrink-0">Profile Presets:</span>
+        <span className="text-xs text-neutral-500 font-medium shrink-0 flex items-center gap-1">
+          <span>Profile Presets:</span>
+          <Tooltip
+            title="Demographic Presets"
+            content="Pre-configured household spending allocations based on Singapore demographic archetypes (e.g. Young Professionals spend more on dining/travel; Seniors allocate more to healthcare)."
+          />
+        </span>
         {PRESETS.map((preset) => (
           <button
             key={preset.name}
@@ -140,8 +152,12 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
           {/* Monthly Budget Input */}
           <div className="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800">
             <div className="flex justify-between items-center mb-2">
-              <label htmlFor="monthly-budget-input" className="text-xs font-semibold text-neutral-900 dark:text-white">
-                Household Monthly Expenditure (SGD)
+              <label htmlFor="monthly-budget-input" className="text-xs font-semibold text-neutral-900 dark:text-white flex items-center gap-1">
+                <span>Household Monthly Expenditure (SGD)</span>
+                <Tooltip
+                  title="Monthly Expenditure (SGD)"
+                  content="The total monthly out-of-pocket spending for your entire household in Singapore Dollars."
+                />
               </label>
               <span className="font-mono font-bold text-sm text-neutral-900 dark:text-white tabular-nums">
                 ${monthlySpend.toLocaleString()} SGD
@@ -167,7 +183,13 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
           {/* Individual Category Sliders */}
           <div className="space-y-4">
             <div className="flex justify-between items-center text-xs font-semibold text-neutral-500">
-              <span>Expenditure Category</span>
+              <span className="flex items-center gap-1">
+                <span>Expenditure Category</span>
+                <Tooltip
+                  title="Spending Breakdown"
+                  content="Adjust the sliders to reflect the relative importance of each category in your family's actual monthly budget."
+                />
+              </span>
               <span>Share of Budget (%)</span>
             </div>
 
@@ -217,7 +239,13 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             </span>
             
             <div className="mb-4">
-              <span className="text-xs text-neutral-500">Your Household's Personal Inflation Rate:</span>
+              <span className="text-xs text-neutral-500 flex items-center gap-1">
+                <span>Your Household's Personal Inflation Rate:</span>
+                <Tooltip
+                  title="Personal Inflation Rate"
+                  content="The weighted annual price increase customized to your household spending distribution. A higher rate means your budget is heavily weighted toward items with steep price increases."
+                />
+              </span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-4xl font-extrabold font-mono text-neutral-900 dark:text-white tabular-nums">
                   +{personalInflationYoY.toFixed(2)}%
@@ -229,13 +257,25 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             {/* Comparison Pill */}
             <div className="p-3 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-xs mb-5">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-neutral-500">National Headline CPI:</span>
+                <span className="text-neutral-500 flex items-center gap-1">
+                  <span>National Headline CPI:</span>
+                  <Tooltip
+                    title="National Benchmark"
+                    content="The official Singapore-wide inflation rate based on the median resident consumption basket."
+                  />
+                </span>
                 <span className="font-mono font-semibold text-neutral-900 dark:text-white">
                   +{headlineYoY.toFixed(2)}% YoY
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-neutral-500">Variance vs National:</span>
+                <span className="text-neutral-500 flex items-center gap-1">
+                  <span>Variance vs National:</span>
+                  <Tooltip
+                    title="Variance vs National"
+                    content="The percentage point difference between your personalized inflation rate and the national benchmark. Positive means higher inflation; negative means lower."
+                  />
+                </span>
                 <span className={`font-mono font-bold ${inflationDelta > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {inflationDelta > 0 ? `+${inflationDelta.toFixed(2)}% higher` : `${Math.abs(inflationDelta).toFixed(2)}% lower`}
                 </span>
@@ -245,7 +285,13 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             {/* Estimated Additional Monthly Expense */}
             <div className="space-y-3 pt-2 border-t border-neutral-200 dark:border-neutral-700">
               <div>
-                <span className="text-xs text-neutral-500">Additional Cost to Maintain Living Standard:</span>
+                <span className="text-xs text-neutral-500 flex items-center gap-1">
+                  <span>Additional Cost to Maintain Living Standard:</span>
+                  <Tooltip
+                    title="Additional Cost to Maintain Living Standard"
+                    content="The extra SGD dollars required every month simply to buy the identical goods and services as 12 months ago."
+                  />
+                </span>
                 <div className="text-2xl font-bold font-mono text-neutral-900 dark:text-white tabular-nums mt-0.5">
                   +${extraMonthlyCost.toLocaleString('en-US', { minimumFractionDigits: 2 })} SGD <span className="text-xs font-normal text-neutral-500">/ mo</span>
                 </div>
@@ -274,3 +320,4 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     </section>
   );
 };
+

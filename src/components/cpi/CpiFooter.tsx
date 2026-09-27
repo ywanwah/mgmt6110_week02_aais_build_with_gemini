@@ -4,9 +4,10 @@ import { ExternalLink, Database, Shield, BookOpen } from 'lucide-react';
 interface CpiFooterProps {
   footnote: string;
   dataLastUpdated: string;
+  onOpenFaq?: () => void;
 }
 
-export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated }) => {
+export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated, onOpenFaq }) => {
   return (
     <footer className="mt-12 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-[#090d14] text-xs text-neutral-500 dark:text-neutral-400 py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -42,6 +43,15 @@ export const CpiFooter: React.FC<CpiFooterProps> = ({ footnote, dataLastUpdated 
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
+            {onOpenFaq && (
+              <button
+                type="button"
+                onClick={onOpenFaq}
+                className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+              >
+                Inflation &amp; CPI FAQ
+              </button>
+            )}
             <a href="https://tablebuilder.singstat.gov.sg"
               target="_blank"
               rel="noopener noreferrer"

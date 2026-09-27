@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { MonthlyDataPoint, ChartMetricMode } from '../../types/cpi';
-import { ArrowUpRight, ArrowDownRight, Maximize2, Layers } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Maximize2, Layers, HelpCircle, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Tooltip } from '../help/Tooltip';
 
 interface CpiTrendChartProps {
   data: MonthlyDataPoint[];
@@ -10,6 +11,7 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
   const [metricMode, setMetricMode] = useState<ChartMetricMode>('index');
   const [timeRange, setTimeRange] = useState<'6M' | '1Y' | 'ALL'>('ALL');
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [showChartGuide, setShowChartGuide] = useState<boolean>(false);
 
   // Filtered dataset according to timeRange
   const activeSeries = useMemo(() => {
@@ -91,6 +93,19 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
             <h2 className="text-base font-bold text-neutral-900 dark:text-white tracking-tight">
               18-Month CPI Trend (All Items)
             </h2>
+            <Tooltip
+              title="18-Month CPI Trend Chart"
+              content="This chart shows how the Singapore Consumer Price Index has changed month-by-month over the selected time period. The horizontal X-axis represents time (reporting months), and the vertical Y-axis represents the price index or percentage change. An upward or downward movement represents a change in price levels and should be interpreted alongside household wage growth rather than as purely good or bad."
+              iconSize={15}
+            />
+            <button
+              onClick={() => setShowChartGuide((prev) => !prev)}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline px-2 py-0.5 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+              aria-expanded={showChartGuide}
+            >
+              <span>{showChartGuide ? 'Hide Chart Guide' : 'How to Read Chart'}</span>
+              {showChartGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
             <span className="hidden sm:inline-block text-xs text-neutral-400">·</span>
             <span className="hidden sm:inline-block text-xs font-mono text-neutral-500">
               {data[0]?.period} – {data[data.length - 1]?.period}
@@ -118,40 +133,104 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
         )}
       </div>
 
+      {/* TASK 3: Contextual Chart Help Accordion/Panel */}
+      {showChartGuide && (
+        <div className="mb-4 p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs text-neutral-700 dark:text-neutral-300 space-y-3 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between pb-2 border-b border-blue-200/60 dark:border-blue-900/40">
+            <span className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              Chart Documentation &amp; Interpretation Guide
+            </span>
+            <button
+              onClick={() => setShowChartGuide(false)}
+              className="text-neutral-400 hover:text-neutral-700 dark:hover:text-white"
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] leading-relaxed">
+            <div>
+              <strong className="text-neutral-900 dark:text-white block mb-0.5">Axes &amp; Units:</strong>
+              <p>
+                <strong>X-Axis:</strong> Chronological reporting months (e.g. 2025 Mar through 2026 Aug).<br />
+                <strong>Y-Axis:</strong> Price level in points (Base 2024 = 100.0) or percentage (%) change.
+              </p>
+            </div>
+
+            <div>
+              <strong className="text-neutral-900 dark:text-white block mb-0.5">Lines &amp; Visual Indicators:</strong>
+              <p>
+                <strong>Blue Line &amp; Fill:</strong> Historical CPI index points or monthly velocity.<br />
+                <strong>Rose Line:</strong> Annual Year-on-Year inflation trajectory.<br />
+                <strong>Dashed Red Line:</strong> MAS 2.0% medium-term goal or Base 100.0 level.
+              </p>
+            </div>
+
+            <div>
+              <strong className="text-neutral-900 dark:text-white block mb-0.5">Interactions &amp; Interpretation:</strong>
+              <p>
+                Hover or tap anywhere to inspect individual monthly values. Upward slope indicates rising consumer price levels; downward slope indicates price easing or deflation. Neither is inherently good or bad on its own.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Control Strip: Metric Mode & Time Ranges */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         {/* Metric Mode Segmented Buttons */}
         <div className="flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/80 dark:border-neutral-800">
-          <button
-            onClick={() => setMetricMode('index')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-              metricMode === 'index'
-                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-            }`}
-          >
-            Index Level (2024=100)
-          </button>
-          <button
-            onClick={() => setMetricMode('yoy')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-              metricMode === 'yoy'
-                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-            }`}
-          >
-            YoY Inflation %
-          </button>
-          <button
-            onClick={() => setMetricMode('mom')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-              metricMode === 'mom'
-                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-            }`}
-          >
-            MoM Velocity %
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => setMetricMode('index')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                metricMode === 'index'
+                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              Index Level (2024=100)
+            </button>
+            <Tooltip
+              title="Index Level Mode"
+              content="Displays the price level standardized against the 2024 base year (100.000). Values above 100 represent cumulative inflation since 2024."
+            />
+          </div>
+
+          <div className="flex items-center">
+            <button
+              onClick={() => setMetricMode('yoy')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                metricMode === 'yoy'
+                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              YoY Inflation %
+            </button>
+            <Tooltip
+              title="YoY Inflation Mode"
+              content="Displays the annual inflation rate by comparing each month with the exact same month twelve months earlier."
+            />
+          </div>
+
+          <div className="flex items-center">
+            <button
+              onClick={() => setMetricMode('mom')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                metricMode === 'mom'
+                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              MoM Velocity %
+            </button>
+            <Tooltip
+              title="MoM Velocity Mode"
+              content="Displays the rate of change between consecutive months, highlighting short-term acceleration and seasonal swings."
+            />
+          </div>
         </div>
 
         {/* Time Horizon Segmented Buttons */}
@@ -186,6 +265,10 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
           >
             18M All
           </button>
+          <Tooltip
+            title="Time Horizons"
+            content="Filter the visible time window to 6 months, 1 year, or the entire 18-month historical archive available from SingStat."
+          />
         </div>
       </div>
 
@@ -344,25 +427,49 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
       {/* Summary Footer Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 mt-2 border-t border-neutral-200/80 dark:border-neutral-800/80 text-xs">
         <div>
-          <span className="text-neutral-500">18-Month Range Low:</span>
+          <span className="text-neutral-500 flex items-center gap-1">
+            <span>18-Month Range Low:</span>
+            <Tooltip
+              title="18-Month Range Low"
+              content="The lowest index level recorded in the historical series (e.g. 100.599 in March 2025)."
+            />
+          </span>
           <div className="font-mono font-semibold text-neutral-900 dark:text-white mt-0.5">
             {periodLow.toFixed(3)}
           </div>
         </div>
         <div>
-          <span className="text-neutral-500">18-Month Range High:</span>
+          <span className="text-neutral-500 flex items-center gap-1">
+            <span>18-Month Range High:</span>
+            <Tooltip
+              title="18-Month Range High"
+              content="The highest index level reached across the 18-month window (e.g. 103.334 in August 2026)."
+            />
+          </span>
           <div className="font-mono font-semibold text-neutral-900 dark:text-white mt-0.5">
             {periodHigh.toFixed(3)}
           </div>
         </div>
         <div>
-          <span className="text-neutral-500">Net Level Expansion:</span>
+          <span className="text-neutral-500 flex items-center gap-1">
+            <span>Net Level Expansion:</span>
+            <Tooltip
+              title="Net Level Expansion"
+              content="The cumulative point and percentage price increase from the earliest to the most recent data point."
+            />
+          </span>
           <div className="font-mono font-semibold text-rose-600 dark:text-rose-400 mt-0.5">
             +{netChange.toFixed(3)} pts ({netPercent > 0 ? `+${netPercent.toFixed(2)}%` : `${netPercent.toFixed(2)}%`})
           </div>
         </div>
         <div>
-          <span className="text-neutral-500">Avg Monthly Run Rate:</span>
+          <span className="text-neutral-500 flex items-center gap-1">
+            <span>Avg Monthly Run Rate:</span>
+            <Tooltip
+              title="Avg Monthly Run Rate"
+              content="The average monthly percentage pace of price increases over the observed timeline (~0.18%/month represents steady, low inflation)."
+            />
+          </span>
           <div className="font-mono font-semibold text-neutral-900 dark:text-white mt-0.5">
             +0.18% / month
           </div>

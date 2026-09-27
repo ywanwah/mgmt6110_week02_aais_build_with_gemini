@@ -1,11 +1,13 @@
 import React from 'react';
-import { Activity, Download, RefreshCw, Sun, Moon, Database } from 'lucide-react';
+import { Activity, Download, RefreshCw, Sun, Moon, Database, HelpCircle } from 'lucide-react';
 import { CpiViewTab } from '../../types/cpi';
+import { Tooltip } from '../help/Tooltip';
 
 interface CpiHeaderProps {
   activeTab: CpiViewTab;
   setActiveTab: (tab: CpiViewTab) => void;
   onOpenHealthModal: () => void;
+  onOpenHelpModal: () => void;
   onExportCsv: () => void;
   onExportJson: () => void;
   onRefresh: () => void;
@@ -19,6 +21,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
   activeTab,
   setActiveTab,
   onOpenHealthModal,
+  onOpenHelpModal,
   onExportCsv,
   onExportJson,
   onRefresh,
@@ -44,9 +47,21 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
                   <span aria-hidden="true">·</span>
-                  <span>SingStat Official</span>
+                  <span className="flex items-center gap-1">
+                    <span>SingStat Official</span>
+                    <Tooltip
+                      title="SingStat Data Source"
+                      content="Data compiled and published monthly by the Singapore Department of Statistics (SingStat) under the Singapore Open Data Licence."
+                    />
+                  </span>
                   <span aria-hidden="true">·</span>
-                  <span className="font-mono">2024=100</span>
+                  <span className="flex items-center gap-1 font-mono">
+                    <span>2024=100</span>
+                    <Tooltip
+                      title="Base Year (2024=100)"
+                      content="The statistical anchor year where the consumer price index is calibrated to 100.000. All subsequent monthly price movements measure relative changes from this baseline."
+                    />
+                  </span>
                 </span>
               </div>
             </div>
@@ -98,6 +113,17 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
 
           {/* Zone 3: Primary Actions */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Help & Guide Button (Nielsen H10) */}
+            <button
+              id="open-help-modal"
+              onClick={onOpenHelpModal}
+              title="Help & User Guide (Terminology, Charts, Navigation & Interpretation)"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 rounded-lg border border-blue-200/80 dark:border-blue-800 transition-colors whitespace-nowrap shadow-2xs"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Help &amp; Guide</span>
+            </button>
+
             {/* API Health Button matching reference app */}
             <button
               id="open-health-modal"
@@ -168,6 +194,13 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             className={`py-1 px-2 font-medium ${activeTab === 'ledger' ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600' : 'text-neutral-500'}`}
           >
             Ledger
+          </button>
+          <button
+            onClick={onOpenHelpModal}
+            className="py-1 px-2 font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1"
+          >
+            <HelpCircle className="w-3 h-3" />
+            <span>Guide</span>
           </button>
         </div>
       </div>

@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, ChevronDown, ChevronRight, Download, Filter, Info, TrendingUp, TrendingDown } from 'lucide-react';
+import { Search, ArrowUpDown, ChevronDown, ChevronRight, Download, Filter, Info, TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
 import { CpiCategoryItem } from '../../types/cpi';
 import { exportCategoriesToCsv } from '../../utils/cpiUtils';
+import { Tooltip } from '../help/Tooltip';
 
 interface CpiCategoriesTableProps {
   categories: CpiCategoryItem[];
@@ -75,6 +76,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
             <h2 className="text-base font-bold text-neutral-900 dark:text-white tracking-tight">
               Key Expenditure Categories &amp; Basket Breakdown
             </h2>
+            <Tooltip
+              title="Expenditure Basket Breakdown"
+              content="Detailed view of individual spending items tracked by SingStat. The weights represent the share of total spending by resident households as established in the 2023 Household Expenditure Survey (HES)."
+              iconSize={15}
+            />
             <span className="text-xs text-neutral-400">·</span>
             <span className="text-xs font-mono text-neutral-500">{sortedCategories.length} items</span>
           </div>
@@ -173,7 +179,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
               >
                 <div className="flex items-center gap-1">
                   <span>Expenditure Category</span>
-                  <ArrowUpDown className="w-3 h-3" />
+                  <Tooltip
+                    title="Expenditure Category"
+                    content="The specific consumption classification defined under official SingStat standards."
+                  />
+                  <ArrowUpDown className="w-3 h-3 ml-auto" />
                 </div>
               </th>
               <th
@@ -182,6 +192,10 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Basket Weight</span>
+                  <Tooltip
+                    title="Basket Weight (%)"
+                    content="The proportion of total household spending allocated to this category. Items with larger weights exert a stronger mathematical impact on the headline national inflation rate."
+                  />
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
@@ -191,6 +205,10 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Latest Index</span>
+                  <Tooltip
+                    title="Latest Index Level"
+                    content="The price level of this category standardized against Base Year 2024 = 100.000."
+                  />
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
@@ -200,6 +218,10 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>MoM Change</span>
+                  <Tooltip
+                    title="Month-on-Month Change"
+                    content="The 30-day percentage price change compared to the preceding calendar month."
+                  />
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
@@ -209,6 +231,10 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>YoY Inflation</span>
+                  <Tooltip
+                    title="Year-on-Year Inflation"
+                    content="The 12-month percentage price change compared with the same month last year."
+                  />
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
@@ -346,6 +372,16 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* TASK 5: "How to Interpret Basket Weights" Educational Guidance Callout */}
+      <div className="mt-4 p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200/80 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <span className="font-semibold text-neutral-900 dark:text-white">How to Interpret Basket Weights: </span>
+          <span>
+            Weights reflect nationwide expenditure shares from the Household Expenditure Survey (HES 2023). A high-weight category like Food (21%) or Housing (25%) has a much larger impact on total inflation than low-weight categories, even if percentage swings are similar.
+          </span>
+        </div>
       </div>
 
     </section>

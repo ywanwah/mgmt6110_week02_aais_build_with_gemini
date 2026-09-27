@@ -8,15 +8,19 @@ import { CpiHistoricalLedger } from './components/cpi/CpiHistoricalLedger';
 import { CpiHealthModal } from './components/cpi/CpiHealthModal';
 import { CpiFooter } from './components/cpi/CpiFooter';
 import { DisqusComments } from './components/DisqusComments';
+import { HelpModal, HelpTabId } from './components/help/HelpModal';
+import { Tooltip } from './components/help/Tooltip';
 import { initialCpiData } from './data/singstatData';
 import { CpiApiResponse, CpiViewTab } from './types/cpi';
 import { exportCpiToCsv, downloadJson } from './utils/cpiUtils';
-import { AlertCircle, Check, ArrowRight, TrendingUp, TrendingDown, Layers, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Check, ArrowRight, TrendingUp, TrendingDown, Layers, ShieldCheck, HelpCircle } from 'lucide-react';
 
 export default function App() {
   const [cpiData, setCpiData] = useState<CpiApiResponse>(initialCpiData);
   const [activeTab, setActiveTab] = useState<CpiViewTab>('overview');
   const [isHealthModalOpen, setIsHealthModalOpen] = useState<boolean>(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [helpModalTab, setHelpModalTab] = useState<HelpTabId>('about');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>('Just now');
@@ -98,6 +102,10 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenHealthModal={() => setIsHealthModalOpen(true)}
+        onOpenHelpModal={() => {
+          setHelpModalTab('about');
+          setIsHelpModalOpen(true);
+        }}
         onExportCsv={() => {
           exportCpiToCsv(cpiData);
           showToast('Downloaded CPI Historical CSV');
@@ -136,9 +144,15 @@ export default function App() {
               <div className="p-6 rounded-2xl bg-white dark:bg-[#0f141f] border border-neutral-200 dark:border-neutral-800 shadow-xs">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100 dark:border-neutral-800">
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
-                      Top Price Volatility Drivers
-                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
+                        Top Price Volatility Drivers
+                      </h3>
+                      <Tooltip
+                        title="Price Volatility Drivers"
+                        content="Categories displaying the highest absolute annual price swings (Year-on-Year %). Indicates whether inflation is broad-based or concentrated in specific areas."
+                      />
+                    </div>
                     <p className="text-xs text-neutral-500">
                       Largest annual price swings across major consumption groups
                     </p>
@@ -184,9 +198,15 @@ export default function App() {
                 <div>
                   <div className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100 dark:border-neutral-800">
                     <div>
-                      <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
-                        Monetary Policy &amp; Living Costs
-                      </h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-sm font-bold text-neutral-900 dark:text-white tracking-tight">
+                          Monetary Policy &amp; Living Costs
+                        </h3>
+                        <Tooltip
+                          title="MAS S$NEER Policy Framework"
+                          content="The Monetary Authority of Singapore uses the trade-weighted exchange rate (S$NEER) rather than policy interest rates to moderate imported inflation and achieve sustainable price stability."
+                        />
+                      </div>
                       <p className="text-xs text-neutral-500">
                         MAS S$NEER Policy Framework alignment &amp; household simulation
                       </p>
@@ -200,7 +220,13 @@ export default function App() {
 
                   <div className="p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 text-xs space-y-1.5">
                     <div className="flex justify-between items-center text-neutral-500">
-                      <span>MAS Medium-Term Target:</span>
+                      <span className="flex items-center gap-1">
+                        <span>MAS Medium-Term Target:</span>
+                        <Tooltip
+                          title="MAS Target Band (1.5% - 2.5%)"
+                          content="The price stability corridor that MAS considers consistent with sustainable non-inflationary economic growth in Singapore."
+                        />
+                      </span>
                       <span className="font-mono text-neutral-900 dark:text-white font-medium">1.5% – 2.5%</span>
                     </div>
                     <div className="flex justify-between items-center text-neutral-500">
@@ -254,6 +280,10 @@ export default function App() {
       <CpiFooter
         footnote={cpiData.footnote}
         dataLastUpdated={cpiData.dataLastUpdated}
+        onOpenFaq={() => {
+          setHelpModalTab('faq');
+          setIsHelpModalOpen(true);
+        }}
       />
 
       {/* SingStat API Health Diagnostics Modal */}
@@ -261,6 +291,24 @@ export default function App() {
         isOpen={isHealthModalOpen}
         onClose={() => setIsHealthModalOpen(false)}
       />
+
+      {/* Nielsen H10 Help & User Guide Modal */}
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        initialTab={helpModalTab}
+      />
+
+      {/* Persistent Quick Help Floating Button */}
+      <button
+        onClick={() => setIsHelpModalOpen(true)}
+        title="Help & Documentation Guide (Nielsen H10)"
+        aria-label="Open Help & Documentation Guide"
+        className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 select-none focus:outline-hidden focus:ring-2 focus:ring-blue-400"
+      >
+        <HelpCircle className="w-4 h-4" />
+        <span className="hidden sm:inline">Help &amp; Guide</span>
+      </button>
 
     </div>
   );

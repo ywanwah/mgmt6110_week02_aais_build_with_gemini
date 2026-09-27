@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Download, FileText, Calendar, ArrowUpRight, ArrowDownRight, Layers } from 'lucide-react';
+import { Download, FileText, Calendar, ArrowUpRight, ArrowDownRight, Layers, HelpCircle, Info } from 'lucide-react';
 import { MonthlyDataPoint, CpiApiResponse } from '../../types/cpi';
 import { exportCpiToCsv, downloadJson } from '../../utils/cpiUtils';
+import { Tooltip } from '../help/Tooltip';
 
 interface CpiHistoricalLedgerProps {
   data: CpiApiResponse;
@@ -26,6 +27,11 @@ export const CpiHistoricalLedger: React.FC<CpiHistoricalLedgerProps> = ({ data }
             <h2 className="text-base font-bold text-neutral-900 dark:text-white tracking-tight">
               Historical Monthly Index Ledger
             </h2>
+            <Tooltip
+              title="Historical Monthly Ledger"
+              content="Chronological archive of all monthly Consumer Price Index prints published under SingStat TableBuilder M213751. Each record includes index points, MoM velocity, YoY rate, and real purchasing power."
+              iconSize={15}
+            />
             <span className="text-xs text-neutral-400">·</span>
             <span className="text-xs font-mono text-neutral-500">Resource M213751</span>
           </div>
@@ -94,11 +100,51 @@ export const CpiHistoricalLedger: React.FC<CpiHistoricalLedgerProps> = ({ data }
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="bg-neutral-50 dark:bg-neutral-900/80 text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-semibold border-b border-neutral-200 dark:border-neutral-800 select-none">
-              <th className="py-3 px-3">Reporting Period</th>
-              <th className="py-3 px-3 text-right">CPI Level (2024=100)</th>
-              <th className="py-3 px-3 text-right">MoM Change %</th>
-              <th className="py-3 px-3 text-right">YoY Inflation Rate</th>
-              <th className="py-3 px-3 text-right">Real $100 Purchasing Power</th>
+              <th className="py-3 px-3">
+                <div className="flex items-center gap-1">
+                  <span>Reporting Period</span>
+                  <Tooltip
+                    title="Reporting Period"
+                    content="Monthly release date published by SingStat."
+                  />
+                </div>
+              </th>
+              <th className="py-3 px-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <span>CPI Level (2024=100)</span>
+                  <Tooltip
+                    title="CPI Level"
+                    content="Standardized index value relative to the base year benchmark of 100.000."
+                  />
+                </div>
+              </th>
+              <th className="py-3 px-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <span>MoM Change %</span>
+                  <Tooltip
+                    title="MoM Change %"
+                    content="Monthly rate of price change from the previous month."
+                  />
+                </div>
+              </th>
+              <th className="py-3 px-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <span>YoY Inflation Rate</span>
+                  <Tooltip
+                    title="YoY Inflation Rate"
+                    content="Annual inflation rate compared to the same month in the prior calendar year."
+                  />
+                </div>
+              </th>
+              <th className="py-3 px-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <span>Real $100 Purchasing Power</span>
+                  <Tooltip
+                    title="Real Purchasing Power"
+                    content="The equivalent purchasing value of $100 SGD in base year terms (computed as $100 / (CPI / 100))."
+                  />
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/80 text-neutral-700 dark:text-neutral-300">
@@ -139,3 +185,4 @@ export const CpiHistoricalLedger: React.FC<CpiHistoricalLedgerProps> = ({ data }
     </section>
   );
 };
+
