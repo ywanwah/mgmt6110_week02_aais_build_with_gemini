@@ -11,7 +11,7 @@ import { DisqusComments } from './components/DisqusComments';
 import { HelpModal, HelpTabId } from './components/help/HelpModal';
 import { Tooltip } from './components/help/Tooltip';
 import { initialCpiData } from './data/singstatData';
-import { CpiApiResponse, CpiViewTab } from './types/cpi';
+import { CpiApiResponse, CpiCategoryItem, CpiViewTab } from './types/cpi';
 import { exportCpiToCsv, downloadJson } from './utils/cpiUtils';
 import { AlertCircle, Check, ArrowRight, TrendingUp, TrendingDown, Layers, ShieldCheck, HelpCircle } from 'lucide-react';
 
@@ -58,11 +58,25 @@ export default function App() {
       if (res.ok) {
         const json = await res.json();
         if (json && !json.empty && json.latest) {
-          // Merge with initial rich categories if backend only returns basic subset
+          // Merge incoming categories with initial dataset to ensure weights and all categories are preserved
+          const incomingCategories: Partial<CpiCategoryItem>[] = Array.isArray(json.categories) ? json.categories : [];
+          const incomingMap = new Map<string, Partial<CpiCategoryItem>>(
+            incomingCategories.filter((c) => Boolean(c.seriesNo)).map((c) => [c.seriesNo!, c])
+          );
+          const mergedCategories: CpiCategoryItem[] = initialCpiData.categories.map((initCat) => {
+            const incoming = incomingMap.get(initCat.seriesNo);
+            if (!incoming) return initCat;
+            return {
+              ...initCat,
+              ...incoming,
+              weight: typeof incoming.weight === 'number' ? incoming.weight : initCat.weight,
+            };
+          });
+
           setCpiData({
             ...initialCpiData,
             ...json,
-            categories: json.categories && json.categories.length >= 8 ? json.categories : initialCpiData.categories,
+            categories: mergedCategories,
             recentMonthly: json.recentMonthly && json.recentMonthly.length > 0 ? json.recentMonthly : initialCpiData.recentMonthly,
           });
           setLastUpdatedTime(new Date().toLocaleTimeString());

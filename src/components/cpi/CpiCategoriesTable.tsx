@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, ChevronDown, ChevronRight, Download, Filter, Info, TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, Download, Filter, Info, TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
 import { CpiCategoryItem } from '../../types/cpi';
 import { exportCategoriesToCsv } from '../../utils/cpiUtils';
 import { Tooltip } from '../help/Tooltip';
@@ -65,6 +65,17 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
       return sortOrder === 'asc' ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
     });
   }, [filteredCategories, sortField, sortOrder]);
+
+  const renderSortIcon = (field: SortField, extraClass = '') => {
+    if (sortField !== field) {
+      return <ArrowUpDown className={`w-3 h-3 text-neutral-400 ${extraClass}`} aria-hidden="true" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className={`w-3 h-3 text-blue-600 dark:text-blue-400 ${extraClass}`} aria-hidden="true" />
+    ) : (
+      <ArrowDown className={`w-3 h-3 text-blue-600 dark:text-blue-400 ${extraClass}`} aria-hidden="true" />
+    );
+  };
 
   return (
     <section className="bg-white dark:bg-[#0f141f] rounded-2xl border border-neutral-200 dark:border-neutral-800 p-6 shadow-xs transition-colors">
@@ -173,6 +184,8 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
           <thead>
             <tr className="bg-neutral-50 dark:bg-neutral-900/80 text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-semibold border-b border-neutral-200 dark:border-neutral-800 select-none">
               <th
+                scope="col"
+                aria-sort={sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('name')}
                 className="py-3 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white"
               >
@@ -182,10 +195,12 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                     title="Expenditure Category"
                     content="The specific consumption classification defined under official SingStat standards."
                   />
-                  <ArrowUpDown className="w-3 h-3 ml-auto" />
+                  {renderSortIcon('name', 'ml-auto')}
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'weight' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('weight')}
                 className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
               >
@@ -195,10 +210,12 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                     title="Basket Weight (%)"
                     content="The proportion of total household spending allocated to this category. Items with larger weights exert a stronger mathematical impact on the headline national inflation rate."
                   />
-                  <ArrowUpDown className="w-3 h-3" />
+                  {renderSortIcon('weight')}
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'value' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('value')}
                 className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
               >
@@ -208,10 +225,12 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                     title="Latest Index Level"
                     content="The price level of this category standardized against Base Year 2024 = 100.000."
                   />
-                  <ArrowUpDown className="w-3 h-3" />
+                  {renderSortIcon('value')}
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'momPercent' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('momPercent')}
                 className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
               >
@@ -221,10 +240,12 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                     title="Month-on-Month Change"
                     content="The 30-day percentage price change compared to the preceding calendar month."
                   />
-                  <ArrowUpDown className="w-3 h-3" />
+                  {renderSortIcon('momPercent')}
                 </div>
               </th>
               <th
+                scope="col"
+                aria-sort={sortField === 'yoyPercent' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('yoyPercent')}
                 className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
               >
@@ -234,7 +255,7 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                     title="Year-on-Year Inflation"
                     content="The 12-month percentage price change compared with the same month last year."
                   />
-                  <ArrowUpDown className="w-3 h-3" />
+                  {renderSortIcon('yoyPercent')}
                 </div>
               </th>
             </tr>
