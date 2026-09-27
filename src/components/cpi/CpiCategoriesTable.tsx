@@ -79,7 +79,6 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
             <Tooltip
               title="Expenditure Basket Breakdown"
               content="Detailed view of individual spending items tracked by SingStat. The weights represent the share of total spending by resident households as established in the 2023 Household Expenditure Survey (HES)."
-              iconSize={15}
             />
             <span className="text-xs text-neutral-400">·</span>
             <span className="text-xs font-mono text-neutral-500">{sortedCategories.length} items</span>

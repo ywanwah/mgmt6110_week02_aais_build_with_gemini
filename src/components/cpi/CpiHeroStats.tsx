@@ -58,7 +58,6 @@ export const CpiHeroStats: React.FC<CpiHeroStatsProps> = ({
               <Tooltip
                 title="Consumer Price Index (CPI)"
                 content="A statistical benchmark measuring the average change over time in the prices paid by Singapore resident households for a fixed basket of goods and services."
-                iconSize={16}
               />
             </div>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">

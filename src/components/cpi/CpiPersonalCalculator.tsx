@@ -106,7 +106,6 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             <Tooltip
               title="Personal Inflation Rate Simulator"
               content="Simulates your specific household inflation based on your custom spending proportions. While Headline CPI uses national average weights, your true living cost inflation reflects your own family budget mix."
-              iconSize={15}
             />
             <span className="text-xs text-neutral-400">·</span>
             <span className="text-xs font-mono text-neutral-500">Custom Household Modeling</span>
