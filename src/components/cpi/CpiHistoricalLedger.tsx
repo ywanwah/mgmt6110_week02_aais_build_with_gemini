@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Download, FileText, Calendar, ArrowUpRight, ArrowDownRight, Layers, HelpCircle, Info } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Download, FileText, Calendar, ArrowUpRight, ArrowDownRight, Layers, HelpCircle, Info, ChevronDown } from 'lucide-react';
 import { MonthlyDataPoint, CpiApiResponse } from '../../types/cpi';
 import { exportCpiToCsv, downloadJson } from '../../utils/cpiUtils';
 import { Tooltip } from '../help/Tooltip';
@@ -10,6 +10,32 @@ interface CpiHistoricalLedgerProps {
 
 export const CpiHistoricalLedger: React.FC<CpiHistoricalLedgerProps> = ({ data }) => {
   const [selectedYear, setSelectedYear] = useState<'all' | '2026' | '2025'>('all');
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isExportMenuOpen) return;
+
+    const handlePointerDown = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setIsExportMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsExportMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isExportMenuOpen]);
 
   const filteredHistory = useMemo(() => {
     const list = [...data.recentMonthly].reverse(); // Most recent first
@@ -40,21 +66,67 @@ export const CpiHistoricalLedger: React.FC<CpiHistoricalLedgerProps> = ({ data }
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+          {/* Primary Action: Download CSV */}
           <button
             onClick={() => exportCpiToCsv(data)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700/80 rounded-lg border border-neutral-200 dark:border-neutral-700 transition-colors"
+            title="Download complete historical dataset as CSV (recommended for Excel / spreadsheet users)"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-100 hover:text-neutral-950 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/90 dark:bg-neutral-800 dark:hover:bg-neutral-700 rounded-lg border border-neutral-300/90 dark:border-neutral-600 shadow-2xs transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" />
             <span>Download CSV</span>
           </button>
-          <button
-            onClick={() => downloadJson(data, 'singstat_cpi_archive.json')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700/80 rounded-lg border border-neutral-200 dark:border-neutral-700 transition-colors"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Export JSON</span>
-          </button>
+
+          {/* Secondary Action: More export options dropdown */}
+          <div className="relative" ref={exportMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsExportMenuOpen((prev) => !prev)}
+              aria-expanded={isExportMenuOpen}
+              aria-haspopup="true"
+              title="More export options (developer and machine-readable formats)"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800/80 rounded-lg border border-neutral-200/80 dark:border-neutral-700/80 transition-colors"
+            >
+              <span>More export options</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-150 ${
+                  isExportMenuOpen ? 'rotate-180 text-neutral-700 dark:text-neutral-200' : ''
+                }`}
+              />
+            </button>
+
+            {isExportMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#131b29] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-2 z-30 animate-in fade-in zoom-in-95 duration-100"
+              >
+                <div className="px-2 pt-1 pb-1.5 text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                  Secondary Export Formats
+                </div>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    downloadJson(data, 'singstat_cpi_archive.json');
+                    setIsExportMenuOpen(false);
+                  }}
+                  className="w-full text-left p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group flex items-start gap-2.5"
+                >
+                  <FileText className="w-4 h-4 mt-0.5 text-neutral-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0" />
+                  <div className="flex-1">
+                    <div className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
+                      <span>JSON — for developers/data tools</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/60 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        .json
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">
+                      Machine-readable format mainly intended for developers and data tools. Most users should use CSV.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
