@@ -71,9 +71,9 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
       return <ArrowUpDown className={`w-3 h-3 text-neutral-400 ${extraClass}`} aria-hidden="true" />;
     }
     return sortOrder === 'asc' ? (
-      <ArrowUp className={`w-3 h-3 text-blue-600 dark:text-blue-400 ${extraClass}`} aria-hidden="true" />
+      <ArrowUp className={`w-3.5 h-3.5 text-blue-600 dark:text-blue-400 stroke-[2.75] ${extraClass}`} aria-hidden="true" />
     ) : (
-      <ArrowDown className={`w-3 h-3 text-blue-600 dark:text-blue-400 ${extraClass}`} aria-hidden="true" />
+      <ArrowDown className={`w-3.5 h-3.5 text-blue-600 dark:text-blue-400 stroke-[2.75] ${extraClass}`} aria-hidden="true" />
     );
   };
 
@@ -187,7 +187,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                 scope="col"
                 aria-sort={sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('name')}
-                className="py-3 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white"
+                className={`py-3 px-3 cursor-pointer transition-colors ${
+                  sortField === 'name'
+                    ? 'text-neutral-900 dark:text-white font-bold bg-blue-50/70 dark:bg-blue-950/40'
+                    : 'hover:text-neutral-900 dark:hover:text-white'
+                }`}
               >
                 <div className="flex items-center gap-1">
                   <span>Expenditure Category</span>
@@ -202,7 +206,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                 scope="col"
                 aria-sort={sortField === 'weight' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('weight')}
-                className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
+                className={`py-3 px-3 text-right cursor-pointer transition-colors ${
+                  sortField === 'weight'
+                    ? 'text-neutral-900 dark:text-white font-bold bg-blue-50/70 dark:bg-blue-950/40'
+                    : 'hover:text-neutral-900 dark:hover:text-white'
+                }`}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Basket Weight</span>
@@ -217,7 +225,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                 scope="col"
                 aria-sort={sortField === 'value' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('value')}
-                className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
+                className={`py-3 px-3 text-right cursor-pointer transition-colors ${
+                  sortField === 'value'
+                    ? 'text-neutral-900 dark:text-white font-bold bg-blue-50/70 dark:bg-blue-950/40'
+                    : 'hover:text-neutral-900 dark:hover:text-white'
+                }`}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>Latest Index</span>
@@ -232,7 +244,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                 scope="col"
                 aria-sort={sortField === 'momPercent' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('momPercent')}
-                className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
+                className={`py-3 px-3 text-right cursor-pointer transition-colors ${
+                  sortField === 'momPercent'
+                    ? 'text-neutral-900 dark:text-white font-bold bg-blue-50/70 dark:bg-blue-950/40'
+                    : 'hover:text-neutral-900 dark:hover:text-white'
+                }`}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>MoM Change</span>
@@ -247,7 +263,11 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({ categori
                 scope="col"
                 aria-sort={sortField === 'yoyPercent' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
                 onClick={() => handleSort('yoyPercent')}
-                className="py-3 px-3 text-right cursor-pointer hover:text-neutral-900 dark:hover:text-white"
+                className={`py-3 px-3 text-right cursor-pointer transition-colors ${
+                  sortField === 'yoyPercent'
+                    ? 'text-neutral-900 dark:text-white font-bold bg-blue-50/70 dark:bg-blue-950/40'
+                    : 'hover:text-neutral-900 dark:hover:text-white'
+                }`}
               >
                 <div className="flex items-center justify-end gap-1">
                   <span>YoY Inflation</span>
