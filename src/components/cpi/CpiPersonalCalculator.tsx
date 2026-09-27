@@ -53,19 +53,57 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     return init;
   });
 
-  // Compute weighted personal inflation
-  const totalWeight = useMemo(() => {
-    return (Object.values(weights) as number[]).reduce((a, b) => a + b, 0);
-  }, [weights]);
-
-  const personalInflationYoY = useMemo(() => {
-    if (totalWeight === 0) return headlineYoY;
+  // Existing calculation function preserved exactly
+  const calculateSimulation = (currentWeights: Record<string, number>) => {
+    const totalW = (Object.values(currentWeights) as number[]).reduce((a, b) => a + b, 0);
+    if (totalW === 0) return headlineYoY;
     const weightedSum = CATEGORIES.reduce((acc, cat) => {
-      const w = weights[cat.id] || 0;
-      return acc + (w / totalWeight) * cat.inflationYoY;
+      const w = currentWeights[cat.id] || 0;
+      return acc + (w / totalW) * cat.inflationYoY;
     }, 0);
     return Number(weightedSum.toFixed(2));
-  }, [weights, totalWeight, headlineYoY]);
+  };
+
+  const [simulatedRate, setSimulatedRate] = useState<number>(() => {
+    const init: Record<string, number> = {};
+    CATEGORIES.forEach((c) => {
+      init[c.id] = c.defaultWeight;
+    });
+    return calculateSimulation(init);
+  });
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Compute live read-only allocation total without mutating state
+  const totalAllocation = useMemo(() => {
+    const sum = (Object.values(weights) as number[]).reduce((a, b) => a + b, 0);
+    return Math.round(sum * 10) / 10;
+  }, [weights]);
+
+  // Live status message formatted exactly as specified
+  const allocationStatus = useMemo(() => {
+    if (totalAllocation < 100) {
+      const remaining = (100 - totalAllocation).toFixed(1);
+      return {
+        text: `Allocated: ${totalAllocation.toFixed(1)}% — ${remaining}% remaining`,
+        colorClass: 'text-amber-600 dark:text-amber-400',
+      };
+    }
+    if (totalAllocation > 100) {
+      const excess = (totalAllocation - 100).toFixed(1);
+      return {
+        text: `Allocated: ${totalAllocation.toFixed(1)}% — reduce categories by ${excess}%`,
+        colorClass: 'text-rose-600 dark:text-rose-400',
+      };
+    }
+    return {
+      text: 'Allocated: 100.0% — balanced',
+      colorClass: 'text-emerald-600 dark:text-emerald-400',
+    };
+  }, [totalAllocation]);
+
+  // Personal Inflation uses the simulated rate from valid calculations
+  const personalInflationYoY = simulatedRate;
 
   // Difference vs National
   const inflationDelta = Number((personalInflationYoY - headlineYoY).toFixed(2));
@@ -73,6 +111,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
   const nationalExtraCost = Number(((monthlySpend * headlineYoY) / 100).toFixed(2));
   const monthlyCostDelta = Number((extraMonthlyCost - nationalExtraCost).toFixed(2));
 
+  // Independent slider update: changes ONLY the specific category without redistributing others
   const handleSliderChange = (id: string, val: number) => {
     setWeights((prev) => ({
       ...prev,
@@ -80,8 +119,31 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     }));
   };
 
+  // Validation wrapper before calling simulation
+  const handleValidatedSimulation = () => {
+    const roundedTotal = Math.round((Object.values(weights) as number[]).reduce((a, b) => a + b, 0) * 10) / 10;
+
+    if (roundedTotal < 100) {
+      const remaining = (100 - roundedTotal).toFixed(1);
+      setValidationError(`Your spending mix must total 100%. Please allocate the remaining ${remaining}%.`);
+      return;
+    }
+
+    if (roundedTotal > 100) {
+      const excess = (roundedTotal - 100).toFixed(1);
+      setValidationError(`Your spending mix must total 100%. Please reduce your allocation by ${excess}%.`);
+      return;
+    }
+
+    setValidationError(null);
+    const result = calculateSimulation(weights);
+    setSimulatedRate(result);
+  };
+
   const applyPreset = (presetWeights: Record<string, number>) => {
     setWeights({ ...presetWeights });
+    setValidationError(null);
+    setSimulatedRate(calculateSimulation(presetWeights));
   };
 
   const resetDefaults = () => {
@@ -91,6 +153,8 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     });
     setWeights(init);
     setMonthlySpend(5000);
+    setValidationError(null);
+    setSimulatedRate(calculateSimulation(init));
   };
 
   return (
@@ -186,17 +250,17 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                 <span>Expenditure Category Weights</span>
                 <Tooltip
                   title="Spending Breakdown"
-                  content="Adjust the sliders to reflect the relative importance of each category in your family's actual monthly budget. Proportions are automatically normalized to 100%."
+                  content="Adjust each slider to reflect its proportion of your family's monthly budget. Sliders are independent and must total 100% to run the simulation."
                 />
               </span>
-              <span className="text-xs font-mono text-neutral-400">
-                Normalized to 100%
+              <span className={`text-xs font-mono font-medium ${allocationStatus.colorClass}`}>
+                {allocationStatus.text}
               </span>
             </div>
 
             {CATEGORIES.map((cat) => {
-              const currentVal = weights[cat.id] || 0;
-              const normalizedPct = totalWeight > 0 ? ((currentVal / totalWeight) * 100).toFixed(1) : '0.0';
+              const currentVal = weights[cat.id] ?? 0;
+              const displayVal = currentVal.toFixed(1);
 
               return (
                 <div key={cat.id} className="p-3 rounded-xl border border-neutral-100 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/30">
@@ -209,7 +273,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                         cat rate: +{cat.inflationYoY.toFixed(2)}%
                       </span>
                       <span className="font-mono font-bold text-xs text-neutral-900 dark:text-white tabular-nums w-14 text-right">
-                        {normalizedPct}%
+                        {displayVal}%
                       </span>
                     </div>
                   </div>
@@ -217,7 +281,8 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                   <input
                     type="range"
                     min={0}
-                    max={50}
+                    max={100}
+                    step={0.1}
                     value={currentVal}
                     onChange={(e) => handleSliderChange(cat.id, Number(e.target.value))}
                     className="w-full accent-blue-600 cursor-pointer"
@@ -229,6 +294,27 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                 </div>
               );
             })}
+
+            {/* Simulation Action Button & Validation Alert */}
+            <div className="pt-2 space-y-2">
+              <button
+                id="run-simulation-btn"
+                type="button"
+                onClick={handleValidatedSimulation}
+                className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Run Simulation</span>
+              </button>
+
+              {validationError && (
+                <div
+                  role="alert"
+                  className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-xs text-amber-800 dark:text-amber-200 font-medium"
+                >
+                  {validationError}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
