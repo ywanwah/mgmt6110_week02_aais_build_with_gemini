@@ -7,6 +7,18 @@ interface CpiTrendChartProps {
   data: MonthlyDataPoint[];
 }
 
+function formatMonthYear(period: string): string {
+  if (!period) return '';
+  const parts = period.trim().split(/\s+/);
+  if (parts.length === 2) {
+    if (/^\d{4}$/.test(parts[0])) {
+      return `${parts[1]} ${parts[0]}`;
+    }
+    return `${parts[0]} ${parts[1]}`;
+  }
+  return period;
+}
+
 export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
   const [metricMode, setMetricMode] = useState<ChartMetricMode>('index');
   const [timeRange, setTimeRange] = useState<'6M' | '1Y' | 'ALL'>('ALL');
@@ -273,9 +285,20 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
       </div>
 
       {/* SVG Canvas Container */}
-      <div className="relative w-full overflow-x-auto select-none">
-        <div className="min-w-[560px]">
-          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+      <div
+        className="relative w-full overflow-x-auto select-none"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setHoverIndex(null);
+        }}
+      >
+        <div className="min-w-[560px] relative">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="w-full h-auto overflow-visible"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setHoverIndex(null);
+            }}
+          >
             <defs>
               <linearGradient id="cpiAreaGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#2563eb" stopOpacity="0.28" />
@@ -362,12 +385,22 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
                   cx={pt.x}
                   cy={pt.y}
                   r={hoverIndex === i ? 6 : 3}
-                  className={`transition-all ${
+                  className={`transition-all cursor-pointer ${
                     hoverIndex === i
                       ? 'fill-blue-600 dark:fill-blue-400 stroke-white dark:stroke-neutral-900 stroke-2'
                       : 'fill-blue-500/80 hover:fill-blue-600'
                   }`}
-                />
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    setHoverIndex(i);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHoverIndex(i);
+                  }}
+                >
+                  <title>{`${formatMonthYear(pt.data.period)}\nCPI: ${pt.data.value.toFixed(1)}`}</title>
+                </circle>
               </g>
             ))}
 
@@ -379,7 +412,7 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
                 x2={points[hoverIndex].x}
                 y2={padding.top + innerHeight}
                 stroke="currentColor"
-                className="text-neutral-400 dark:text-neutral-600"
+                className="text-neutral-400 dark:text-neutral-600 pointer-events-none"
                 strokeWidth="1"
                 strokeDasharray="2 2"
               />
@@ -396,31 +429,109 @@ export const CpiTrendChart: React.FC<CpiTrendChartProps> = ({ data }) => {
                   x={pt.x}
                   y={padding.top + innerHeight + 22}
                   textAnchor="middle"
-                  className="text-[11px] font-mono fill-neutral-500 dark:fill-neutral-400"
+                  className="text-[11px] font-mono fill-neutral-500 dark:fill-neutral-400 pointer-events-none"
                 >
                   {pt.data.period.replace('20', "'")}
                 </text>
               );
             })}
 
-            {/* Invisible Hit Zones for Hover */}
+            {/* Hit Zones for Hover, Touch & Keyboard Focus */}
             {points.map((pt, i) => {
               const colWidth = innerWidth / (points.length || 1);
               return (
                 <rect
                   key={i}
+                  data-testid={`cpi-point-${i}`}
                   x={pt.x - colWidth / 2}
                   y={padding.top}
                   width={colWidth}
                   height={innerHeight}
                   fill="transparent"
-                  className="cursor-crosshair"
+                  className="cursor-crosshair focus:outline-hidden"
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${formatMonthYear(pt.data.period)}, CPI: ${pt.data.value.toFixed(1)}`}
                   onMouseEnter={() => setHoverIndex(i)}
                   onMouseLeave={() => setHoverIndex(null)}
-                />
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    setHoverIndex(i);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHoverIndex(i);
+                  }}
+                  onFocus={() => setHoverIndex(i)}
+                  onBlur={() => setHoverIndex(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowRight' && i < points.length - 1) {
+                      e.preventDefault();
+                      setHoverIndex(i + 1);
+                    } else if (e.key === 'ArrowLeft' && i > 0) {
+                      e.preventDefault();
+                      setHoverIndex(i - 1);
+                    } else if (e.key === 'Escape') {
+                      setHoverIndex(null);
+                    }
+                  }}
+                >
+                  <title>{`${formatMonthYear(pt.data.period)}\nCPI: ${pt.data.value.toFixed(1)}`}</title>
+                </rect>
               );
             })}
           </svg>
+
+          {/* Interactive Floating Tooltip */}
+          {hoverIndex !== null && points[hoverIndex] && (() => {
+            const pt = points[hoverIndex];
+            const isNearTop = pt.y < 75;
+            const isNearLeft = pt.x < 110;
+            const isNearRight = pt.x > width - 110;
+            const transformX = isNearLeft ? '0%' : isNearRight ? '-100%' : '-50%';
+            const arrowLeft = isNearLeft ? '18px' : isNearRight ? 'calc(100% - 18px)' : '50%';
+
+            return (
+              <div
+                data-testid="cpi-chart-tooltip"
+                style={{
+                  left: `${(pt.x / width) * 100}%`,
+                  top: `${(pt.y / height) * 100}%`,
+                  transform: `translate(${transformX}, ${isNearTop ? '12px' : 'calc(-100% - 12px)'})`,
+                }}
+                className="absolute pointer-events-none z-30 transition-all duration-75"
+              >
+                <div className="relative px-3 py-2 rounded-xl bg-neutral-900/95 dark:bg-neutral-800/95 text-white border border-neutral-700/80 shadow-2xl backdrop-blur-md text-xs whitespace-nowrap text-center select-none">
+                  <div className="font-semibold text-neutral-100 text-[12px] tracking-tight">
+                    {formatMonthYear(pt.data.period)}
+                  </div>
+                  <div className="font-mono text-neutral-200 text-[12px] font-bold mt-0.5">
+                    CPI: {pt.data.value.toFixed(1)}
+                  </div>
+                  {metricMode === 'yoy' && pt.data.yoyPercent !== undefined && (
+                    <div className="text-[10px] font-mono text-rose-400 mt-0.5">
+                      YoY: {pt.data.yoyPercent >= 0 ? `+${pt.data.yoyPercent.toFixed(2)}%` : `${pt.data.yoyPercent.toFixed(2)}%`}
+                    </div>
+                  )}
+                  {metricMode === 'mom' && pt.data.momPercent !== undefined && (
+                    <div className="text-[10px] font-mono text-emerald-400 mt-0.5">
+                      MoM: {pt.data.momPercent >= 0 ? `+${pt.data.momPercent.toFixed(2)}%` : `${pt.data.momPercent.toFixed(2)}%`}
+                    </div>
+                  )}
+
+                  {/* Pointer Arrow */}
+                  <div
+                    style={{ left: arrowLeft }}
+                    className={`absolute w-2 h-2 -translate-x-1/2 bg-neutral-900 dark:bg-neutral-800 rotate-45 border-neutral-700/80 ${
+                      isNearTop
+                        ? 'top-[-5px] border-l border-t'
+                        : 'bottom-[-5px] border-r border-b'
+                    }`}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
