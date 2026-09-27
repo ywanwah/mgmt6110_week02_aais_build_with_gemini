@@ -111,9 +111,12 @@
 
 .desktop-secondary-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.5rem;
-  flex-shrink: 0;
+  row-gap: 0.375rem;
+  max-width: 100%;
 }
 
 .compact-more {
