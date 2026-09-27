@@ -104,3 +104,73 @@
 .tick-down-flash {
   animation: tick-flash-red 0.7s ease-out;
 }
+
+/* ==========================================================================
+   Responsive Header Breakpoints (1280px Intermediate Breakpoint)
+   ========================================================================== */
+
+.desktop-secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.compact-more {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.header-singstat-meta {
+  display: inline-flex;
+}
+
+/* 1280px and below: Hide desktop actions, show More menu */
+@media (max-width: 1280px) {
+  .desktop-secondary-actions {
+    display: none !important;
+  }
+
+  .compact-more {
+    display: flex !important;
+    flex-shrink: 0;
+  }
+
+  .header-singstat-meta {
+    display: none !important;
+  }
+}
+
+/* Mobile breakpoint (< 768px): Hide both, mobile header takes over */
+@media (max-width: 767px) {
+  .desktop-secondary-actions {
+    display: none !important;
+  }
+
+  .compact-more {
+    display: none !important;
+  }
+
+  .header-singstat-meta {
+    display: none !important;
+  }
+}
+
+/* More Dropdown Menu Styling */
+.more-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.more-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  min-width: 220px;
+  max-width: calc(100vw - 24px);
+  height: auto;
+  z-index: 1000;
+}

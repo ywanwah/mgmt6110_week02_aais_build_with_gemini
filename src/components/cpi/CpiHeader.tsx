@@ -65,21 +65,21 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
   }, [isMoreOpen]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0c1017]/90 backdrop-blur-md transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between min-h-16 py-2 gap-2 sm:gap-4 w-full min-w-0">
+    <header className="sticky top-0 z-40 w-full max-w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0c1017]/90 backdrop-blur-md transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full min-w-0">
+        <div className="flex items-center justify-between min-h-16 py-2 gap-2 sm:gap-4 w-full max-w-full min-w-0">
           
           {/* Zone 1: Single text element wordmark with domain metadata */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-shrink-0 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-red-600 dark:bg-red-700 flex items-center justify-center text-white font-bold text-sm shadow-xs select-none shrink-0">
               SG
             </div>
             <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <span className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-white truncate">
                   Singapore CPI Terminal
                 </span>
-                <span className="hidden min-[1181px]:inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="header-singstat-meta items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 shrink-0">
                   <span aria-hidden="true">·</span>
                   <span className="flex items-center gap-1">
                     <span>SingStat Official</span>
@@ -102,10 +102,10 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
           </div>
 
           {/* Zone 2: Navigation Links / Segmented Tabs */}
-          <nav className="hidden md:flex items-center gap-0.5 min-[1181px]:gap-1 p-1 bg-neutral-100 dark:bg-neutral-900/80 rounded-lg border border-neutral-200/80 dark:border-neutral-800 shrink-0">
+          <nav className="hidden md:flex items-center gap-0.5 xl:gap-1 p-1 bg-neutral-100 dark:bg-neutral-900/80 rounded-lg border border-neutral-200/80 dark:border-neutral-800 shrink-0 min-w-0">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 xl:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -115,7 +115,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('breakdown')}
-              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 xl:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'breakdown'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -125,7 +125,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('calculator')}
-              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 xl:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'calculator'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -135,7 +135,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('ledger')}
-              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 xl:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'ledger'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -145,14 +145,14 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
           </nav>
 
-          {/* Zone 3 Desktop (> 1180px): Exactly original desktop layout */}
-          <div className="hidden min-[1181px]:flex items-center gap-2 shrink-0">
+          {/* Zone 3 Desktop (> 1280px): Strictly visible only above 1280px */}
+          <div className="desktop-secondary-actions">
             {/* Help & Guide Button (Nielsen H10) */}
             <button
               id="open-help-modal"
               onClick={onOpenHelpModal}
               title="Help & User Guide (Terminology, Charts, Navigation & Interpretation)"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 rounded-lg border border-blue-200/80 dark:border-blue-800 transition-colors whitespace-nowrap shadow-2xs"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 rounded-lg border border-blue-200/80 dark:border-blue-800 transition-colors whitespace-nowrap shadow-2xs cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Help &amp; Guide</span>
@@ -163,7 +163,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
               id="open-health-modal"
               onClick={onOpenHealthModal}
               title="Inspect SingStat TableBuilder API Health Diagnostics"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors whitespace-nowrap cursor-pointer"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -175,7 +175,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
               <button
                 onClick={onExportCsv}
                 title="Download CSV data"
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors whitespace-nowrap cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Export</span>
@@ -187,7 +187,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
               onClick={onRefresh}
               disabled={isRefreshing}
               title={`Last refreshed at ${lastUpdatedTime}`}
-              className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+              className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
             </button>
@@ -196,15 +196,15 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             <button
               onClick={toggleDarkMode}
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+              className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors cursor-pointer"
             >
               {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
             </button>
           </div>
 
-          {/* Zone 3 Intermediate (768px to 1180px): Single More Menu Button */}
-          <div className="hidden md:flex min-[1181px]:hidden items-center gap-2 shrink-0">
-            <div className="relative" ref={moreMenuRef}>
+          {/* Zone 3 Intermediate (768px to 1280px): Strictly visible only between 768px and 1280px */}
+          <div className="compact-more">
+            <div className="more-wrapper" ref={moreMenuRef}>
               <button
                 ref={moreButtonRef}
                 id="header-more-menu-btn"
@@ -214,7 +214,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
                 aria-haspopup="true"
                 aria-label="More actions and settings"
                 title="More options (Help, API Health, Export, Refresh, Theme)"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
                   isMoreOpen
                     ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-300 dark:border-neutral-700'
                     : 'bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border-neutral-200 dark:border-neutral-700/80'
@@ -232,16 +232,17 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
                 <div
                   role="menu"
                   aria-orientation="vertical"
-                  className="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#131b29] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs"
+                  className="more-menu bg-white dark:bg-[#131b29] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-1.5 text-xs animate-in fade-in zoom-in-95 duration-100"
                 >
                   {/* Help & Guide */}
                   <button
+                    type="button"
                     role="menuitem"
                     onClick={() => {
                       onOpenHelpModal();
                       setIsMoreOpen(false);
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
@@ -252,12 +253,13 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
 
                   {/* API Health */}
                   <button
+                    type="button"
                     role="menuitem"
                     onClick={() => {
                       onOpenHealthModal();
                       setIsMoreOpen(false);
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="relative flex items-center justify-center">
@@ -271,12 +273,13 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
 
                   {/* Export CSV */}
                   <button
+                    type="button"
                     role="menuitem"
                     onClick={() => {
                       onExportCsv();
                       setIsMoreOpen(false);
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <Download className="w-4 h-4 text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white shrink-0" />
@@ -287,13 +290,14 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
 
                   {/* Refresh Live Data */}
                   <button
+                    type="button"
                     role="menuitem"
                     onClick={() => {
                       onRefresh();
                       setIsMoreOpen(false);
                     }}
                     disabled={isRefreshing}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group disabled:opacity-50"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group disabled:opacity-50 cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <RefreshCw
@@ -312,12 +316,13 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
 
                   {/* Theme Switch */}
                   <button
+                    type="button"
                     role="menuitem"
                     onClick={() => {
                       toggleDarkMode();
                       setIsMoreOpen(false);
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       {darkMode ? (

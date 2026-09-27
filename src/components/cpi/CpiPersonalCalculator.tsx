@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, ArrowRight, RotateCcw, AlertCircle, DollarSign, PieChart, Sparkles, HelpCircle, Info } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Tooltip } from '../help/Tooltip';
 
 interface CpiPersonalCalculatorProps {
@@ -53,13 +53,13 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     return init;
   });
 
+  // Compute weighted personal inflation
   const totalWeight = useMemo(() => {
-    return Object.values(weights).reduce((a: number, b: number) => a + b, 0);
+    return (Object.values(weights) as number[]).reduce((a, b) => a + b, 0);
   }, [weights]);
 
-  // Compute weighted personal inflation
   const personalInflationYoY = useMemo(() => {
-    if (totalWeight <= 0) return headlineYoY;
+    if (totalWeight === 0) return headlineYoY;
     const weightedSum = CATEGORIES.reduce((acc, cat) => {
       const w = weights[cat.id] || 0;
       return acc + (w / totalWeight) * cat.inflationYoY;
@@ -76,7 +76,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
   const handleSliderChange = (id: string, val: number) => {
     setWeights((prev) => ({
       ...prev,
-      [id]: Math.max(0, Math.min(100, val))
+      [id]: val,
     }));
   };
 
@@ -181,20 +181,22 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
 
           {/* Individual Category Sliders */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center text-xs font-semibold text-neutral-500">
-              <span className="flex items-center gap-1">
-                <span>Expenditure Category</span>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-semibold text-neutral-900 dark:text-white flex items-center gap-1">
+                <span>Expenditure Category Weights</span>
                 <Tooltip
                   title="Spending Breakdown"
-                  content="Adjust the sliders to reflect the relative importance of each category in your family's actual monthly budget."
+                  content="Adjust the sliders to reflect the relative importance of each category in your family's actual monthly budget. Proportions are automatically normalized to 100%."
                 />
               </span>
-              <span>Share of Budget (%)</span>
+              <span className="text-xs font-mono text-neutral-400">
+                Normalized to 100%
+              </span>
             </div>
 
             {CATEGORIES.map((cat) => {
               const currentVal = weights[cat.id] || 0;
-              const normalizedPct = totalWeight > 0 ? ((currentVal / totalWeight) * 100).toFixed(1) : '0';
+              const normalizedPct = totalWeight > 0 ? ((currentVal / totalWeight) * 100).toFixed(1) : '0.0';
 
               return (
                 <div key={cat.id} className="p-3 rounded-xl border border-neutral-100 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/30">
@@ -206,7 +208,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                       <span className="text-[11px] font-mono text-neutral-400">
                         cat rate: +{cat.inflationYoY.toFixed(2)}%
                       </span>
-                      <span className="font-mono font-bold text-xs text-neutral-900 dark:text-white tabular-nums w-12 text-right">
+                      <span className="font-mono font-bold text-xs text-neutral-900 dark:text-white tabular-nums w-14 text-right">
                         {normalizedPct}%
                       </span>
                     </div>
@@ -215,11 +217,11 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
                   <input
                     type="range"
                     min={0}
-                    max={60}
-                    step={1}
+                    max={50}
                     value={currentVal}
                     onChange={(e) => handleSliderChange(cat.id, Number(e.target.value))}
                     className="w-full accent-blue-600 cursor-pointer"
+                    aria-label={`${cat.name} spending percentage`}
                   />
                   <p className="text-[11px] text-neutral-400 mt-1 truncate">
                     {cat.description}
@@ -319,4 +321,3 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     </section>
   );
 };
-
