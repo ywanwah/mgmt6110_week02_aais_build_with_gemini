@@ -1,5 +1,5 @@
-import React from 'react';
-import { Activity, Download, RefreshCw, Sun, Moon, Database, HelpCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Activity, Download, RefreshCw, Sun, Moon, Database, HelpCircle, ChevronDown } from 'lucide-react';
 import { CpiViewTab } from '../../types/cpi';
 import { Tooltip } from '../help/Tooltip';
 
@@ -30,22 +30,56 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
   toggleDarkMode,
   lastUpdatedTime,
 }) => {
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isMoreOpen) return;
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      if (
+        moreMenuRef.current &&
+        !moreMenuRef.current.contains(e.target as Node) &&
+        moreButtonRef.current &&
+        !moreButtonRef.current.contains(e.target as Node)
+      ) {
+        setIsMoreOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMoreOpen(false);
+        moreButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMoreOpen]);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-[#0c1017]/90 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between min-h-16 py-2 gap-4">
+        <div className="flex items-center justify-between min-h-16 py-2 gap-2 sm:gap-4 w-full min-w-0">
           
           {/* Zone 1: Single text element wordmark with domain metadata */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-red-600 dark:bg-red-700 flex items-center justify-center text-white font-bold text-sm shadow-xs select-none">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-red-600 dark:bg-red-700 flex items-center justify-center text-white font-bold text-sm shadow-xs select-none shrink-0">
               SG
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-white">
+                <span className="text-base sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-white truncate">
                   Singapore CPI Terminal
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="hidden min-[1181px]:inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
                   <span aria-hidden="true">·</span>
                   <span className="flex items-center gap-1">
                     <span>SingStat Official</span>
@@ -68,20 +102,20 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
           </div>
 
           {/* Zone 2: Navigation Links / Segmented Tabs */}
-          <nav className="hidden md:flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900/80 rounded-lg border border-neutral-200/80 dark:border-neutral-800">
+          <nav className="hidden md:flex items-center gap-0.5 min-[1181px]:gap-1 p-1 bg-neutral-100 dark:bg-neutral-900/80 rounded-lg border border-neutral-200/80 dark:border-neutral-800 shrink-0">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              Overview & Trends
+              Overview &amp; Trends
             </button>
             <button
               onClick={() => setActiveTab('breakdown')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
                 activeTab === 'breakdown'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -91,7 +125,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('calculator')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
                 activeTab === 'calculator'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -101,7 +135,7 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('ledger')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              className={`px-2 min-[1181px]:px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
                 activeTab === 'ledger'
                   ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-xs'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
@@ -111,8 +145,8 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
             </button>
           </nav>
 
-          {/* Zone 3: Primary Actions */}
-          <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
+          {/* Zone 3 Desktop (> 1180px): Exactly original desktop layout */}
+          <div className="hidden min-[1181px]:flex items-center gap-2 shrink-0">
             {/* Help & Guide Button (Nielsen H10) */}
             <button
               id="open-help-modal"
@@ -163,6 +197,194 @@ export const CpiHeader: React.FC<CpiHeaderProps> = ({
               onClick={toggleDarkMode}
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               className="p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
+            </button>
+          </div>
+
+          {/* Zone 3 Intermediate (768px to 1180px): Single More Menu Button */}
+          <div className="hidden md:flex min-[1181px]:hidden items-center gap-2 shrink-0">
+            <div className="relative" ref={moreMenuRef}>
+              <button
+                ref={moreButtonRef}
+                id="header-more-menu-btn"
+                type="button"
+                onClick={() => setIsMoreOpen((prev) => !prev)}
+                aria-expanded={isMoreOpen}
+                aria-haspopup="true"
+                aria-label="More actions and settings"
+                title="More options (Help, API Health, Export, Refresh, Theme)"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
+                  isMoreOpen
+                    ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white border-neutral-300 dark:border-neutral-700'
+                    : 'bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border-neutral-200 dark:border-neutral-700/80'
+                }`}
+              >
+                <span>More</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                    isMoreOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {isMoreOpen && (
+                <div
+                  role="menu"
+                  aria-orientation="vertical"
+                  className="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#131b29] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs"
+                >
+                  {/* Help & Guide */}
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      onOpenHelpModal();
+                      setIsMoreOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span className="font-medium">Help &amp; Guide</span>
+                    </div>
+                    <span className="text-[10px] text-neutral-400 font-mono">Guide</span>
+                  </button>
+
+                  {/* API Health */}
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      onOpenHealthModal();
+                      setIsMoreOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      </div>
+                      <span className="font-medium">API Health Diagnostics</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">Live</span>
+                  </button>
+
+                  {/* Export CSV */}
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      onExportCsv();
+                      setIsMoreOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Download className="w-4 h-4 text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white shrink-0" />
+                      <span className="font-medium">Export CSV Data</span>
+                    </div>
+                    <span className="text-[10px] text-neutral-400 font-mono">.csv</span>
+                  </button>
+
+                  {/* Refresh Live Data */}
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      onRefresh();
+                      setIsMoreOpen(false);
+                    }}
+                    disabled={isRefreshing}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group disabled:opacity-50"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <RefreshCw
+                        className={`w-4 h-4 text-neutral-500 dark:text-neutral-400 shrink-0 ${
+                          isRefreshing ? 'animate-spin text-blue-600' : ''
+                        }`}
+                      />
+                      <span className="font-medium">Refresh Data</span>
+                    </div>
+                    <span className="text-[10px] text-neutral-400 font-mono truncate max-w-[70px]">
+                      {lastUpdatedTime || 'Sync'}
+                    </span>
+                  </button>
+
+                  <div className="my-1 border-t border-neutral-100 dark:border-neutral-800/80" />
+
+                  {/* Theme Switch */}
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      toggleDarkMode();
+                      setIsMoreOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {darkMode ? (
+                        <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+                      ) : (
+                        <Moon className="w-4 h-4 text-neutral-600 shrink-0" />
+                      )}
+                      <span className="font-medium">
+                        {darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {darkMode ? 'Dark' : 'Light'}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Zone 3 Mobile (< 768px): Existing mobile actions */}
+          <div className="flex md:hidden flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
+            {/* Help & Guide Button (Nielsen H10) */}
+            <button
+              id="open-help-modal-mobile"
+              onClick={onOpenHelpModal}
+              title="Help & User Guide"
+              className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 rounded-lg border border-blue-200/80 dark:border-blue-800 transition-colors whitespace-nowrap"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Help</span>
+            </button>
+
+            {/* API Health Button */}
+            <button
+              id="open-health-modal-mobile"
+              onClick={onOpenHealthModal}
+              title="SingStat API Health"
+              className="p-1.5 text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/80 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            </button>
+
+            {/* Export Dropdown / Action */}
+            <button
+              onClick={onExportCsv}
+              title="Download CSV data"
+              className="p-1.5 text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/80 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Refresh Live Data */}
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              title={`Last refreshed at ${lastUpdatedTime}`}
+              className="p-1.5 text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/80 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
+            </button>
+
+            {/* Dark / Light Mode Switch */}
+            <button
+              onClick={toggleDarkMode}
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-1.5 text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/80 rounded-lg border border-neutral-200 dark:border-neutral-700/80 transition-colors"
             >
               {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
             </button>
