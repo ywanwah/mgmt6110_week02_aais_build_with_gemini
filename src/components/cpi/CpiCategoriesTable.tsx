@@ -17,6 +17,55 @@ interface CpiCategoriesTableProps {
 
 type FilterMode = 'all' | 'high' | 'moderate' | 'deflation' | 'weight';
 
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s]/g, "");
+}
+
+function findClosestCategory(query: string, categories: CpiCategoryItem[]) {
+  const q = normalizeText(query);
+
+  if (q.length < 3) return null;
+
+  let bestMatch: CpiCategoryItem | null = null;
+  let bestScore = 0;
+
+  for (const category of categories) {
+    const name = normalizeText(category.name);
+    const words = name.split(/\s+/);
+
+    for (const word of words) {
+      const prefixLength = Math.min(q.length, word.length);
+
+      let matchingPrefix = 0;
+
+      for (let i = 0; i < prefixLength; i++) {
+        if (q[i] !== word[i]) break;
+        matchingPrefix++;
+      }
+
+      const prefixScore =
+        matchingPrefix / Math.max(q.length, word.length);
+
+      let containmentBonus = 0;
+      if (word.includes(q) || q.includes(word)) {
+        containmentBonus = 0.2;
+      }
+
+      const totalScore = prefixScore + containmentBonus;
+
+      if (totalScore > bestScore) {
+        bestScore = totalScore;
+        bestMatch = category;
+      }
+    }
+  }
+
+  return bestScore >= 0.55 ? bestMatch : null;
+}
+
 export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({
   categories,
   latestPeriod,
@@ -300,11 +349,31 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/80 text-neutral-700 dark:text-neutral-300">
             {sortedCategories.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-neutral-400">
-                  No expenditure categories matched "{searchQuery}".
-                </td>
-              </tr>
+              (() => {
+                const suggestion = searchQuery.trim() ? findClosestCategory(searchQuery, categories) : null;
+                return (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-neutral-400">
+                      {suggestion ? (
+                        <div className="flex flex-col items-center justify-center gap-1.5">
+                          <p className="text-neutral-600 dark:text-neutral-300 font-medium">
+                            No exact matches for &ldquo;{searchQuery}&rdquo;.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery(suggestion.name)}
+                            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold text-xs inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            Did you mean {suggestion.name}?
+                          </button>
+                        </div>
+                      ) : (
+                        <span>No expenditure categories matched &ldquo;{searchQuery}&rdquo;.</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })()
             ) : (
               sortedCategories.map((cat) => {
                 const isExpanded = expandedSeries === cat.seriesNo;
