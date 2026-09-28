@@ -28,7 +28,7 @@ export const CpiHeroStats: React.FC<CpiHeroStatsProps> = ({
       {/* Background Subtle Ambience / Scrim */}
       <div className="absolute inset-0 pointer-events-none opacity-15 dark:opacity-25 overflow-hidden">
         <img
-          src="/src/assets/images/singapore_financial_skyline_1790326092088.jpg"
+          src="/assets/images/singapore_financial_skyline_1790326092088.jpg"
           alt="Singapore Financial District"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center filter grayscale contrast-125"
