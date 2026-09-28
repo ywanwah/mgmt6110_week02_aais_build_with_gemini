@@ -133,7 +133,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
                 Help &amp; Documentation Guide
               </h2>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Nielsen H10 reference guide to Singapore Consumer Price Index (CPI) metrics &amp; terminal tools
+                Guide to Singapore Consumer Price Index (CPI) metrics &amp; terminal tools
               </p>
             </div>
           </div>

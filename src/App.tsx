@@ -332,7 +332,7 @@ export default function App() {
       {/* Persistent Quick Help Floating Button */}
       <button
         onClick={() => setIsHelpModalOpen(true)}
-        title="Help & Documentation Guide (Nielsen H10)"
+        title="Help & Documentation Guide"
         aria-label="Open Help & Documentation Guide"
         className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 select-none focus:outline-hidden focus:ring-2 focus:ring-blue-400"
       >
