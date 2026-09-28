@@ -10,6 +10,7 @@ export interface TooltipProps {
   align?: 'start' | 'center' | 'end';
   iconSize?: number;
   inline?: boolean;
+  ariaLabel?: string;
 }
 
 interface TooltipCoords {
@@ -25,6 +26,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   className = '',
   side = 'top',
   iconSize = 14,
+  ariaLabel,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -209,7 +211,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         }}
         aria-describedby={isOpen ? tooltipId : undefined}
         aria-expanded={isOpen}
-        aria-label={title ? `Information about ${title}` : 'Help information'}
+        aria-label={ariaLabel || (title ? `Information about ${title}` : 'Help information')}
         className={`inline-flex items-center justify-center p-0.5 rounded-md transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 shrink-0 ${
           isOpen
             ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 ring-1 ring-blue-300 dark:ring-blue-800'

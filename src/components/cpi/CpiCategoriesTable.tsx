@@ -331,9 +331,21 @@ export const CpiCategoriesTable: React.FC<CpiCategoriesTableProps> = ({
                             )}
                           </button>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-neutral-900 dark:text-white">
-                              {cat.name}
-                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-semibold text-neutral-900 dark:text-white flex items-center gap-1.5">
+                                {cat.name}
+                                {cat.seriesNo === 'MAS.CORE' && (
+                                  <button
+                                    type="button"
+                                    aria-label="About MAS Core Inflation Index policy basket coverage"
+                                    title="MAS Core Inflation Index represents coverage of the MAS Core policy basket. It is not an individual expenditure-category basket weight and should not be added to category weights such as Food or Housing & Utilities."
+                                    className="inline-flex items-center justify-center ml-1 p-0.5 text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 cursor-help focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded text-xs font-normal"
+                                  >
+                                    ⓘ
+                                  </button>
+                                )}
+                              </span>
+                            </div>
                             <div className="flex items-center gap-1.5 text-[11px] text-neutral-400">
                               <span className="font-mono">{cat.seriesNo}</span>
                               {cat.group && (
