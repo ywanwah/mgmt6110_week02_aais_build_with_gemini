@@ -45,6 +45,7 @@ const PRESETS = [
 
 export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ headlineYoY }) => {
   const [monthlySpend, setMonthlySpend] = useState<number>(5000);
+  const [activePreset, setActivePreset] = useState<string | null>(null);
   const [weights, setWeights] = useState<Record<string, number>>(() => {
     const init: Record<string, number> = {};
     CATEGORIES.forEach((c) => {
@@ -117,6 +118,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
       ...prev,
       [id]: val,
     }));
+    setActivePreset(null);
   };
 
   // Validation wrapper before calling simulation
@@ -140,10 +142,11 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     setSimulatedRate(result);
   };
 
-  const applyPreset = (presetWeights: Record<string, number>) => {
-    setWeights({ ...presetWeights });
+  const applyPreset = (preset: { name: string; weights: Record<string, number> }) => {
+    setWeights({ ...preset.weights });
     setValidationError(null);
-    setSimulatedRate(calculateSimulation(presetWeights));
+    setSimulatedRate(calculateSimulation(preset.weights));
+    setActivePreset(preset.name);
   };
 
   const resetDefaults = () => {
@@ -155,6 +158,7 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
     setMonthlySpend(5000);
     setValidationError(null);
     setSimulatedRate(calculateSimulation(init));
+    setActivePreset(null);
   };
 
   return (
@@ -197,15 +201,23 @@ export const CpiPersonalCalculator: React.FC<CpiPersonalCalculatorProps> = ({ he
             content="Pre-configured household spending allocations based on Singapore demographic archetypes (e.g. Young Professionals spend more on dining/travel; Seniors allocate more to healthcare)."
           />
         </span>
-        {PRESETS.map((preset) => (
-          <button
-            key={preset.name}
-            onClick={() => applyPreset(preset.weights)}
-            className="px-3 py-1 text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-700 transition-colors whitespace-nowrap"
-          >
-            {preset.name}
-          </button>
-        ))}
+        {PRESETS.map((preset) => {
+          const isActive = activePreset === preset.name;
+          return (
+            <button
+              key={preset.name}
+              onClick={() => applyPreset(preset)}
+              aria-pressed={isActive}
+              className={`px-3 py-1 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap cursor-pointer ${
+                isActive
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-800 font-semibold shadow-2xs'
+                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 border-neutral-200 dark:border-neutral-700'
+              }`}
+            >
+              {preset.name}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
