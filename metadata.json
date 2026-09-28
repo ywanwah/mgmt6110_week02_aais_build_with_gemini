@@ -1,6 +1,6 @@
 {
-  "name": "FinancialHub Markets",
-  "description": "Real-time global financial markets dashboard with indices, stocks, crypto, futures, forex, and economic indicators.",
+  "name": "Singapore CPI Terminal",
+  "description": "Explore Singapore Consumer Price Index trends by category and estimate how inflation may affect household spending.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
