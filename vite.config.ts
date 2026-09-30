@@ -26,7 +26,7 @@ function cpiApiPlugin(): Plugin {
               resourceId: 'M213751',
               baseYear: '2024',
               latencyMs: 78,
-              lastUpdated: '23/09/2026',
+              lastUpdated: new Date().toLocaleDateString('en-GB'),
             })
           );
           return;

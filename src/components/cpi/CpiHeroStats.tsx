@@ -76,9 +76,14 @@ export const CpiHeroStats: React.FC<CpiHeroStatsProps> = ({
               />
             </div>
             <span aria-hidden="true" className="text-neutral-300 dark:text-neutral-700">|</span>
-            <div>
-              <span>Updated:</span>{' '}
+            <div className="flex items-center gap-1">
+              <span>CPI data published:</span>{' '}
               <span className="font-mono text-neutral-900 dark:text-white">{dataLastUpdated}</span>
+              <Tooltip
+                title="CPI Data Published"
+                content="Publication date of the CPI dataset currently shown in the dashboard."
+                ariaLabel="About CPI data publication date"
+              />
             </div>
             <span aria-hidden="true" className="text-neutral-300 dark:text-neutral-700">|</span>
             <div className="flex items-center gap-1">

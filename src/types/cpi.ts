@@ -52,6 +52,7 @@ export interface ApiHealthStatus {
   message: string;
   latencyMs?: number;
   checkedAt?: string;
+  lastUpdated?: string;
 }
 
 export type CpiViewTab = 'overview' | 'breakdown' | 'calculator' | 'ledger';
